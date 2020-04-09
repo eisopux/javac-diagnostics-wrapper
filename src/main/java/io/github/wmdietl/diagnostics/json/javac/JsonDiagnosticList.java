@@ -1,4 +1,4 @@
-package org.checkerframework.diagnostics;
+package io.github.wmdietl.diagnostics.json.javac;
 
 import java.util.ArrayList;
 import java.util.List;

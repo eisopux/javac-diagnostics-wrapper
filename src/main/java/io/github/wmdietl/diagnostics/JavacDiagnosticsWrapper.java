@@ -1,6 +1,5 @@
-package org.checkerframework.diagnostics;
+package io.github.wmdietl.diagnostics;
 
-import com.google.gson.Gson;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,16 +14,13 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 /**
- * This is a simple wrapper around javac to output diagnostics as JSON.
+ * Wrapper around javac to output diagnostics in an easily-configurable way.
  *
  * <p>Based on code examples from: http://openjdk.java.net/groups/compiler/guide/compilerAPI.html
  */
-public class JavacDiagnosticWrapper {
-    public static void main(String[] args) {
-        new JavacDiagnosticWrapper(args);
-    }
+public abstract class JavacDiagnosticsWrapper {
 
-    private JavacDiagnosticWrapper(String[] args) {
+    public void run(String[] args) {
         JavaCompiler javac = ToolProvider.getSystemJavaCompiler();
         StandardJavaFileManager fileManager = javac.getStandardFileManager(null, null, null);
         JavacOptions options = JavacOptions.parse(javac, fileManager, args);
@@ -55,13 +51,14 @@ public class JavacDiagnosticWrapper {
      * Callback to handle the diagnostics from a compilation task. At the moment this outputs a JSON
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
-    protected void processDiagnostics(
-            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics) {
-        JsonDiagnosticList diags = new JsonDiagnosticList(diagnostics);
-        System.out.println(new Gson().toJson(diags, JsonDiagnosticList.class));
-    }
+    protected abstract void processDiagnostics(
+            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics);
 
-    /** @author Peter von der Ahe */
+    /**
+     * Decode Java compiler options.
+     *
+     * @author Peter von der Ahe
+     */
     private static final class JavacOptions {
         private final List<String> recognizedOptions;
         private final List<String> classNames;
@@ -93,13 +90,19 @@ public class JavacDiagnosticWrapper {
                 }
                 if (optionCount < 0) {
                     File file = new File(argument);
-                    if (file.exists()) files.add(file);
-                    else if (SourceVersion.isName(argument)) classNames.add(argument);
-                    else unrecognizedOptions.add(argument);
+                    if (file.exists()) {
+                        files.add(file);
+                    } else if (SourceVersion.isName(argument)) {
+                        classNames.add(argument);
+                    } else {
+                        unrecognizedOptions.add(argument);
+                    }
                 } else {
                     for (int j = 0; j < optionCount + 1; j++) {
                         int index = i + j;
-                        if (index == arguments.length) throw new IllegalArgumentException(argument);
+                        if (index == arguments.length) {
+                            throw new IllegalArgumentException(argument);
+                        }
                         recognizedOptions.add(arguments[index]);
                     }
                     i += optionCount;
