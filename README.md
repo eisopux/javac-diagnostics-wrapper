@@ -5,7 +5,7 @@ Wrapper around javac to output diagnostics in an easily-configurable way.
 ## How to Build
 
 ```shell
-./gradlew shadowJar
+./gradlew assemble
 ```
 
 will generate `build/libs/javac-diagnostics-wrapper-all.jar`.
