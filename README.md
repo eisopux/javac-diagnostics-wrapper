@@ -13,7 +13,7 @@ will generate `build/libs/javac-diagnostics-wrapper-all.jar`.
 
 ## How to Use
 
-Simply use instead of your usual javac command.
+Simply use instead of your usual `javac` command.
 
 Instead of
 
@@ -27,19 +27,18 @@ use
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
     io.github.wmdietl.diagnostics.json.lsp.Main \
-    -flags \
-    File1.java File2.java
+    -flags File1.java File2.java
 ```
 
 There are currently two supported output formats:
-- `io.github.wmdietl.diagnostics.json.lsp.Main` produces output in the LSP JSON format.
-- `io.github.wmdietl.diagnostics.json.javac.Main` produces output in a simple JSON format
+- `io.github.wmdietl.diagnostics.json.lsp.Main` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
+- `io.github.wmdietl.diagnostics.json.javac.Main` produces output in a JSON format
    directly corresponding to the javac diagnostics.
 
 
 ## Examples
 
-Normal compilation of a file with errors, using the simple javac format:
+Normal compilation of a file with errors, using the javac format:
 
 ```shell
 java \
@@ -122,7 +121,7 @@ results in:
 
 ## How to Develop
 
-To format the source code, run `$ ./gradlew spotlessApply`.
+To format the source code, run `./gradlew spotlessApply`.
 
 
 ## Acknowledgements
