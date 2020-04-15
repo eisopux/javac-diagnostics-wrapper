@@ -18,7 +18,11 @@ public class JsonDiagnostic implements Diagnostic {
     private final String message;
 
     JsonDiagnostic(Diagnostic<? extends JavaFileObject> diagnostic) {
-        fileUri = diagnostic.getSource().toUri().toString();
+        if (diagnostic.getSource() == null) {
+            fileUri = null;
+        } else {
+            fileUri = diagnostic.getSource().toUri().toString();
+        }
         kind = diagnostic.getKind().name();
         position = diagnostic.getPosition();
         startPosition = diagnostic.getStartPosition();
