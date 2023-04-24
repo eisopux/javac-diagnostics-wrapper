@@ -1,6 +1,7 @@
 package io.github.wmdietl.diagnostics.json.javac;
 
 import java.util.Locale;
+
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
