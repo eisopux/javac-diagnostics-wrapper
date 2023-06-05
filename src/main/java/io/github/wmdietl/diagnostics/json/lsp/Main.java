@@ -3,14 +3,14 @@ package io.github.wmdietl.diagnostics.json.lsp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.tools.JavaFileObject;
+
+import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
 public class Main extends JavacDiagnosticsWrapper {
