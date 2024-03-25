@@ -50,7 +50,7 @@ public class Main extends JavacDiagnosticsWrapper {
         Sarif sarifObj = new Sarif(driver);
         sarifObj.addResults(jsonDiagnostics);
         String results = sarifObj.toJson();
-        sarifObj.downloadAsSARIF();
+       // sarifObj.downloadAsSARIF();
         System.out.println(results);
     }
 
