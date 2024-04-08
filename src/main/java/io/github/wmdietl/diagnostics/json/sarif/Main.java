@@ -23,7 +23,7 @@ public class Main extends JavacDiagnosticsWrapper {
     /** Serialize the diagnostics using the Sarif format. */
     @Override
     protected void processDiagnostics(
-        boolean result, List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
+        boolean result, List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics, String classpath) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<Diagnostic>> fileDiagnostics = new HashMap<>();
         for (javax.tools.Diagnostic<? extends JavaFileObject> d : diagnostics) {
@@ -41,7 +41,7 @@ public class Main extends JavacDiagnosticsWrapper {
             jsonDiagnostics.add(new FileDiagnostics(entry.getKey(), entry.getValue()));
         }
 
-        Sarif.Rule newRule = new Sarif.Rule("Renew", "RuleRenew", "https://github.com/eisopux/javac-diagnostics-wrapper", "\"https://pvs-studio.com/en/renewal/\"");
+        Sarif.Rule newRule = new Sarif.Rule(classpath, classpath, "https://github.com/eisopux/javac-diagnostics-wrapper", "https://github.com/eisopux/javac-diagnostics-wrapper");
            
         List<Sarif.Rule> rules = new ArrayList<>();
         rules.add(newRule);

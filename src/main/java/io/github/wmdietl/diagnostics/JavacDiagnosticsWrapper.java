@@ -44,8 +44,13 @@ public abstract class JavacDiagnosticsWrapper {
                                 options.getClassNames(),
                                 javaFiles)
                         .call();
+        
+        String classpath = "Default";
+        if (args[0] == "-classpath") {
+            classpath = args[1];
+        }       
 
-        processDiagnostics(result, diagnosticCollector.getDiagnostics());
+        processDiagnostics(result, diagnosticCollector.getDiagnostics(), classpath);
     }
 
     /**
@@ -53,7 +58,7 @@ public abstract class JavacDiagnosticsWrapper {
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
     protected abstract void processDiagnostics(
-            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics);
+            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics, String classpath);
 
     /**
      * Decode Java compiler options.

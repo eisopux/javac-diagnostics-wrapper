@@ -22,7 +22,7 @@ public class Main extends JavacDiagnosticsWrapper {
     /** Serialize the diagnostics using Gson. */
     @Override
     protected void processDiagnostics(
-            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics) {
+            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics, String Classpath) {
         JsonDiagnosticList diags = new JsonDiagnosticList(diagnostics);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(gson.toJson(diags, JsonDiagnosticList.class));
