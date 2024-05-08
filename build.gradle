@@ -16,6 +16,7 @@ repositories {
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation group: 'de.jcup.sarif.java', name: 'sarif-2.1.0', version: '1.1.0' 
     testImplementation 'junit:junit:4.13.2'
     errorprone('com.google.errorprone:error_prone_core:2.25.0')
     errorproneJavac('com.google.errorprone:javac:9+181-r4173-1')

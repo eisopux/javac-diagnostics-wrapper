@@ -1,18 +1,24 @@
 package io.github.wmdietl.diagnostics.json.sarif;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.sql.Driver;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.tools.JavaFileObject;
-import javax.tools.Tool;
 
+import de.jcup.sarif_2_1_0.SarifSchema210ImportExportSupport;
+import de.jcup.sarif_2_1_0.model.*;
+import de.jcup.sarif_2_1_0.model.SarifSchema210.Version;
+
+import de.jcup.sarif_2_1_0.model.Result.Level;
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
+
 
 /** Wrapper around javac to output diagnostics as JSON, in the Sarif format. */
 public class Main extends JavacDiagnosticsWrapper {
@@ -23,7 +29,7 @@ public class Main extends JavacDiagnosticsWrapper {
     /** Serialize the diagnostics using the Sarif format. */
     @Override
     protected void processDiagnostics(
-        boolean result, List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics, String classpath) {
+        boolean result, List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics, String processor) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<Diagnostic>> fileDiagnostics = new HashMap<>();
         for (javax.tools.Diagnostic<? extends JavaFileObject> d : diagnostics) {
@@ -41,17 +47,165 @@ public class Main extends JavacDiagnosticsWrapper {
             jsonDiagnostics.add(new FileDiagnostics(entry.getKey(), entry.getValue()));
         }
 
-        Sarif.Rule newRule = new Sarif.Rule(classpath, classpath, "https://github.com/eisopux/javac-diagnostics-wrapper", "https://github.com/eisopux/javac-diagnostics-wrapper");
-           
-        List<Sarif.Rule> rules = new ArrayList<>();
-        rules.add(newRule);
-        Sarif.Driver driver = new Sarif.Driver("Java Diagnostics Wrapper", "https://github.com/eisopux/javac-diagnostics-wrapper", rules);
+        if (!processor.equals("Default")){
 
-        Sarif sarifObj = new Sarif(driver);
-        sarifObj.addResults(jsonDiagnostics);
-        String results = sarifObj.toJson();
-       // sarifObj.downloadAsSARIF();
-        System.out.println(results);
+        }
+
+        //create a sarif report
+        SarifSchema210 sarifReport = convertToSarif(jsonDiagnostics, processor);
+        SarifSchema210ImportExportSupport exportReport = new SarifSchema210ImportExportSupport();
+        
+        // Create a File object
+        try {
+            String filePath = "../output.sarif";
+            File file = new File(filePath);
+            exportReport.toFile(sarifReport, file);
+        } catch (IOException e) {
+            System.err.println("Error occurred while exporting the file: " + e.getMessage());
+        }
+
+    }
+
+
+    private SarifSchema210 convertToSarif(List<FileDiagnostics> jsonDiagnostics, String processor) {
+        //create sarif object
+        SarifSchema210 sarif = new SarifSchema210();
+
+        //set URI
+        String uri_str = "http://json.schemastore.org/sarif-2.1.0-rtm.4";
+        URI uri = URI.create(uri_str);
+        sarif.set$schema(uri);
+        sarif.setVersion(Version._2_1_0);
+
+        ArrayList<Run> runs = new ArrayList<Run>();
+
+        ToolComponent driver = new ToolComponent();
+        driver.setName("java-diagnostics-wrapper");
+
+        uri_str = "https://github.com/eisopux/javac-diagnostics-wrapper";
+        uri = URI.create(uri_str);
+        driver.setInformationUri(uri);  
+
+        List<Result> results = new ArrayList();
+
+        Set<ReportingDescriptor> rules = new HashSet();
+
+        for (int i=0; i<jsonDiagnostics.size(); i++) {
+
+            List<Diagnostic> diagnostics = jsonDiagnostics.get(i).diagnostics;
+            String diagnostic_uri = jsonDiagnostics.get(i).uri;
+
+            for (int x=0; x<diagnostics.size(); x++){
+                //create result
+                Result result = new Result();
+
+                //destructure diagnostic
+                Range range = diagnostics.get(x).range;
+                Integer severity = diagnostics.get(x).severity;
+                String code = diagnostics.get(x).code;
+                String message = diagnostics.get(x).message;
+
+                //set level
+                switch (severity) {
+                    case 1:
+                        result.setLevel(Level.ERROR);
+                        break;
+                    case 2:
+                        result.setLevel(Level.WARNING);
+                        break;
+                    case 3:
+                        result.setLevel(Level.NOTE);
+                        break;
+                    default:
+                        result.setLevel(Level.NONE);
+                }
+
+                //set message
+                Message msg = new Message();
+                msg.setText(message);
+
+                //create location object
+                List<Location> locations = new ArrayList();
+
+                Location loc = new Location();
+
+                //add physical location
+                PhysicalLocation physLoc = new PhysicalLocation();
+
+                //set artifact location with uri
+                ArtifactLocation artifactLoc = new ArtifactLocation();
+                artifactLoc.setUri(diagnostic_uri);
+
+                //set region 
+                Region reg = new Region();
+                //set start region
+                reg.setStartLine(range.start.line);
+                reg.setStartColumn(range.start.character);
+
+                //set end region
+                reg.setEndLine(range.end.line);
+                reg.setEndColumn(range.end.character);
+
+                //add to physical location
+                physLoc.setArtifactLocation(artifactLoc);
+                physLoc.setRegion(reg);
+
+                loc.setPhysicalLocation(physLoc);
+
+                locations.add(loc);
+
+                //set locations
+                result.setLocations(locations);
+
+                //create rule
+                ReportingDescriptor rule = new ReportingDescriptor();
+                rule.setId(code);
+                //add to set of all rules
+                rules.add(rule);
+                
+                //set rule ID for result
+                String ruleId = code;
+                result.setRuleId(ruleId);
+
+                //add result to list of all results
+                results.add(result);
+            }
+        }
+
+        //add rules to driver
+        driver.setRules(rules);
+
+        //create tool and set driver
+        Tool tool1 = new Tool();
+        tool1.setDriver(driver);
+
+        //if using external checker, add as property
+        if (!"Default".equals(processor)){
+            PropertyBag property = new PropertyBag();
+
+            Set<String> props = new HashSet();
+            props.add(processor);
+
+            property.setTags(props);
+
+            //add to tool
+            tool1.setProperties(property);
+        }
+
+        //create one run and add the tool
+        Run run1 = new Run();
+        run1.setTool(tool1);
+
+        //add results to run
+        run1.setResults(results);
+
+        //add to list of runs 
+        runs.add(run1);
+
+        //add runs to the sarif object
+        sarif.setRuns(runs);
+
+        return sarif;
     }
 
     private Diagnostic convert(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {

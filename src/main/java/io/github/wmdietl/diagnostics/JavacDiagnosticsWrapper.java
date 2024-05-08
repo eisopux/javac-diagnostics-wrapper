@@ -44,13 +44,15 @@ public abstract class JavacDiagnosticsWrapper {
                                 options.getClassNames(),
                                 javaFiles)
                         .call();
+
         
-        String classpath = "Default";
-        if (args[0] == "-classpath") {
-            classpath = args[1];
+        String processor = "Default";
+        System.out.println(args[0]);
+        if ("-classpath".equals(args[0])) {
+            processor = args[3];
         }       
 
-        processDiagnostics(result, diagnosticCollector.getDiagnostics(), classpath);
+        processDiagnostics(result, diagnosticCollector.getDiagnostics(), processor);
     }
 
     /**
