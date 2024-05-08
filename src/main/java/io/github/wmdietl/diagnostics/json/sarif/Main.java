@@ -167,6 +167,9 @@ public class Main extends JavacDiagnosticsWrapper {
                 String ruleId = code;
                 result.setRuleId(ruleId);
 
+                //add message to result
+                result.setMessage(msg);
+
                 //add result to list of all results
                 results.add(result);
             }
