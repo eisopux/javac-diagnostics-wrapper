@@ -3,7 +3,10 @@ package io.github.wmdietl.diagnostics.json.javac;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-/** JSON wrapper class. Fields are encoded in the JSON output. */
+/** 
+ * JSON wrapper class. Fields are encoded in the JSON output.
+ * Define one complete entry in the json output
+ */
 public class JsonDiagnostic {
 
     public final String fileUri;
