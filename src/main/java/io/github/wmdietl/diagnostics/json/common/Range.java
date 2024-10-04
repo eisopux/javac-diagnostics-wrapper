@@ -7,9 +7,6 @@ package io.github.wmdietl.diagnostics.json.common;
  * position denoting the start of the next line.
  */
 public class Range {
-    /** Use this when you do not know the range but have to supply a Range object. */
-    public static final Range NONE = new Range(Position.START, Position.START);
-
     /** The range's start position. */
     public Position start;
 
@@ -17,14 +14,20 @@ public class Range {
     public Position end;
 
     /**
-     * Create a new Range.
-     *
-     * @param start the range's start position
-     * @param end the range's end position
+     * Create a new Range from javac standard diagnostic output
+     * 
+     * @param line see {@code diagnostic.getLineNumber()}
+     * @param column see {@code diagnostic.getColumnNumber()}
+     * @param startPos see {@code diagnostic.getStartPosition()}
+     * @param endPos see {@code diagnostic.getEndPosition()}
      */
-    public Range(Position start, Position end) {
-        this.start = start;
-        this.end = end;
+    public Range(final long line, final long column, final long startPos, final long endPos) {
+        if(line < 1 || column < 1){
+            this.start = this.end = Position.START;
+            return;
+        }
+        this.start = new Position(line - 1, column - 1);
+        this.end = new Position(line - 1, (column - 1 + endPos - startPos));
     }
 
     @Override
@@ -61,7 +64,7 @@ public class Range {
          * @param line line position in a document (zero-based)
          * @param character character offset on a line in a document (zero-based)
          */
-        public Position(long line, long character) {
+        public Position(final long line, final long character) {
             this.line = line;
             this.character = character;
         }

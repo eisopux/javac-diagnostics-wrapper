@@ -14,7 +14,6 @@ import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
 import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 import io.github.wmdietl.diagnostics.json.common.DiagnosticSeverity;
 import io.github.wmdietl.diagnostics.json.common.FileDiagnostics;
-import io.github.wmdietl.diagnostics.json.common.Position;
 import io.github.wmdietl.diagnostics.json.common.Range;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
@@ -59,8 +58,9 @@ public class Main extends JavacDiagnosticsWrapper {
         // Convert from javac severity to self-defined severity
         DiagnosticSeverity severity = DiagnosticSeverity.convert(diagnostic.getKind());
         // Convert from javac error locations to self-defined range
-        Range range = convertRange(
-            diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getStartPosition(), diagnostic.getEndPosition());
+        Range range = new Range(
+            diagnostic.getLineNumber(), diagnostic.getColumnNumber(),
+            diagnostic.getStartPosition(), diagnostic.getEndPosition());
         // Construct the diagnostic object
         return new Diagnostic(
                 range,
@@ -69,15 +69,5 @@ public class Main extends JavacDiagnosticsWrapper {
                 this.getClass().getCanonicalName(),
                 diagnostic.getMessage(null),
                 null);
-    }
-
-    private static Range convertRange(final long line, final long column, final long startPos, final long endPos) {
-        if (line < 1 || column < 1){
-            return new Range(Position.START, Position.START);
-        }
-        // javac is 1-based whereas LSP is 0-based
-        Position start = new Position(line - 1, column - 1);
-        Position end   = new Position(line - 1, (column - 1 + endPos - startPos));
-        return new Range(start, end);
     }
 }
