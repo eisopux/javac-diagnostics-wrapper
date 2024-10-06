@@ -9,7 +9,7 @@ import io.github.wmdietl.diagnostics.json.common.Range;
  * A file plus a list of diagnostics for that file.
  * Define one complete entry in json output
  */
-public class JsonDiagnostics {
+public class JsonDiagnostic {
     /** The URI for which diagnostic information is reported. */
     public final String uri;
 
@@ -22,7 +22,7 @@ public class JsonDiagnostics {
      * @param uri the URI for which diagnostic information is reported
      * @param diagnostics diagnostic information items
      */
-    public JsonDiagnostics(String uri, List<Diagnostic> diagnostics) {
+    public JsonDiagnostic(String uri, List<Diagnostic> diagnostics) {
         this.uri = uri;
         this.diagnostics = diagnostics;
     }
