@@ -15,7 +15,7 @@ public class JavacDiagnostic extends Diagnostic {
     public final String code;
     public final String message;
 
-    JavacDiagnostic(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
+    public JavacDiagnostic(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
         JavaFileObject file = diagnostic.getSource();
         fileUri = file != null ? file.toUri().toString() : "unknown file";
         kind = diagnostic.getKind().name();
