@@ -18,8 +18,9 @@ Simply use instead of your usual `javac` command.
 Instead of
 
 ```shell
-javac -flags File1.java File2.java
+javac [flags] File1.java File2.java
 ```
+(where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
 use
 
@@ -27,8 +28,9 @@ use
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
     io.github.wmdietl.diagnostics.json.lsp.Main \
-    -flags File1.java File2.java
+    [flags] File1.java File2.java
 ```
+(where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
 There are currently two supported output formats:
 - `io.github.wmdietl.diagnostics.json.lsp.Main` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
