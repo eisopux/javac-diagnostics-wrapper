@@ -1,12 +1,10 @@
 package io.github.wmdietl.diagnostics.json.lsp;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import java.util.List;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
+import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
 public class Main extends JavacDiagnosticsWrapper {
@@ -16,9 +14,8 @@ public class Main extends JavacDiagnosticsWrapper {
 
     /** Serialize the diagnostics using the LSP format. */
     @Override
-    protected void processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
+    protected List<Diagnostic> processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
         LspDiagnosticList diags = new LspDiagnosticList(diagnostics);
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        System.out.println(gson.toJson(diags));
+        return diags.getDiagnostics();
     }
 }

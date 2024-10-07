@@ -6,13 +6,17 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.SourceVersion;
-import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.OptionChecker;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
 /**
  * Wrapper around javac to output diagnostics in an easily-configurable way.
@@ -44,14 +48,19 @@ public abstract class JavacDiagnosticsWrapper {
                         javaFiles)
                 .call();
 
-        processDiagnostics(diagnosticCollector.getDiagnostics());
+        // Obtain the processed results of a specific format
+        List<Diagnostic> result = processDiagnostics(diagnosticCollector.getDiagnostics());
+
+        // Perform certain actions on result, such as write to a file or print to stdout
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println(gson.toJson(result));
     }
 
     /**
      * Callback to handle the diagnostics from a compilation task. At the moment this outputs a JSON
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
-    protected abstract void processDiagnostics(List<Diagnostic<? extends JavaFileObject>> diagnostics);
+    protected abstract List<Diagnostic> processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics);
 
     /**
      * Decode Java compiler options.
