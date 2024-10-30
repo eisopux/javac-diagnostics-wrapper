@@ -24,6 +24,6 @@ public class Main extends JavacDiagnosticsWrapper {
     protected void processDiagnostics(List<Diagnostic<? extends JavaFileObject>> diagnostics) {
         JsonDiagnosticList diags = new JsonDiagnosticList(diagnostics);
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        System.out.println(gson.toJson(diags, JsonDiagnosticList.class));
+        System.out.println(gson.toJson(diags));
     }
 }
