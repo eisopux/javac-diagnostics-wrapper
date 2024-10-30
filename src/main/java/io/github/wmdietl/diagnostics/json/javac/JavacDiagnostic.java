@@ -3,7 +3,7 @@ package io.github.wmdietl.diagnostics.json.javac;
 import javax.tools.JavaFileObject;
 import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
-public class JavacDiagnostic extends Diagnostic {
+public class JavacDiagnostic implements Diagnostic {
 
     public final String fileUri;
     public final String kind;

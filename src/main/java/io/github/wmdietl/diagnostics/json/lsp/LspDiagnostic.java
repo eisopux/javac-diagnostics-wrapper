@@ -12,7 +12,7 @@ import io.github.wmdietl.diagnostics.json.common.Diagnostic;
  * A file plus a list of diagnostics for that file.
  * Define one complete entry in json output
  */
-public class LspDiagnostic extends Diagnostic {
+public class LspDiagnostic implements Diagnostic {
     /** The URI for which diagnostic information is reported. */
     public final String uri;
 
