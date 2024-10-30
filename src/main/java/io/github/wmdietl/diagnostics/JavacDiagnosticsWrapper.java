@@ -35,25 +35,23 @@ public abstract class JavacDiagnosticsWrapper {
         Iterable<? extends JavaFileObject> javaFiles =
                 fileManager.getJavaFileObjectsFromFiles(options.getFiles());
 
-        boolean result =
-                javac.getTask(
-                                null,
-                                fileManager,
-                                diagnosticCollector,
-                                options.getRecognizedOptions(),
-                                options.getClassNames(),
-                                javaFiles)
-                        .call();
+        javac.getTask(
+                        null,
+                        fileManager,
+                        diagnosticCollector,
+                        options.getRecognizedOptions(),
+                        options.getClassNames(),
+                        javaFiles)
+                .call();
 
-        processDiagnostics(result, diagnosticCollector.getDiagnostics());
+        processDiagnostics(diagnosticCollector.getDiagnostics());
     }
 
     /**
      * Callback to handle the diagnostics from a compilation task. At the moment this outputs a JSON
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
-    protected abstract void processDiagnostics(
-            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics);
+    protected abstract void processDiagnostics(List<Diagnostic<? extends JavaFileObject>> diagnostics);
 
     /**
      * Decode Java compiler options.

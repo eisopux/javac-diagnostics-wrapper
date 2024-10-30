@@ -20,8 +20,7 @@ public class Main extends JavacDiagnosticsWrapper {
 
     /** Serialize the diagnostics using the LSP format. */
     @Override
-    protected void processDiagnostics(
-            boolean result, List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
+    protected void processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<Diagnostic>> fileDiagnostics = new HashMap<>();
         for (javax.tools.Diagnostic<? extends JavaFileObject> d : diagnostics) {
