@@ -11,7 +11,11 @@ import java.util.Map;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
-import io.github.wmdietl.diagnostics.json.common.*;
+import io.github.wmdietl.diagnostics.json.common.Diagnostic;
+import io.github.wmdietl.diagnostics.json.common.DiagnosticSeverity;
+import io.github.wmdietl.diagnostics.json.common.FileDiagnostics;
+import io.github.wmdietl.diagnostics.json.common.Position;
+import io.github.wmdietl.diagnostics.json.common.Range;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
 public class Main extends JavacDiagnosticsWrapper {
@@ -45,44 +49,19 @@ public class Main extends JavacDiagnosticsWrapper {
         System.out.println(gson.toJson(jsonDiagnostics));
     }
 
+    /**
+     * Convert from standard javac Diagnostic to self-defined Diagnostic object
+     * 
+     * @param diagnostic javac standard diagnostic
+     * @return self-defined diagnostic object
+     */
     private Diagnostic convert(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
-        DiagnosticSeverity severity;
-        switch (diagnostic.getKind()) {
-            case ERROR:
-                severity = DiagnosticSeverity.ERROR;
-                break;
-            case WARNING:
-            case MANDATORY_WARNING:
-                severity = DiagnosticSeverity.WARNING;
-                break;
-            case NOTE:
-            case OTHER:
-                severity = DiagnosticSeverity.INFORMATION;
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected diagnostic kind in: " + diagnostic);
-        }
-
-        int line = (int) diagnostic.getLineNumber();
-        int column = (int) diagnostic.getColumnNumber();
-        Range range;
-        if (line < 1 || column < 1) {
-            // Use beginning of document for invalid locations
-            range = new Range(Position.START, Position.START);
-        } else {
-            // javac is 1-based whereas LSP is 0-based
-            Position start = new Position(line - 1, column - 1);
-            Position end =
-                    new Position(
-                            line - 1,
-                            (int)
-                                    (column
-                                            - 1
-                                            + diagnostic.getEndPosition()
-                                            - diagnostic.getStartPosition()));
-            range = new Range(start, end);
-        }
-
+        // Convert from javac severity to self-defined severity
+        DiagnosticSeverity severity = DiagnosticSeverity.convert(diagnostic.getKind());
+        // Convert from javac error locations to self-defined range
+        Range range = convertRange(
+            diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getStartPosition(), diagnostic.getEndPosition());
+        // Construct the diagnostic object
         return new Diagnostic(
                 range,
                 severity.value,
@@ -90,5 +69,15 @@ public class Main extends JavacDiagnosticsWrapper {
                 this.getClass().getCanonicalName(),
                 diagnostic.getMessage(null),
                 null);
+    }
+
+    private static Range convertRange(final long line, final long column, final long startPos, final long endPos) {
+        if (line < 1 || column < 1){
+            return new Range(Position.START, Position.START);
+        }
+        // javac is 1-based whereas LSP is 0-based
+        Position start = new Position(line - 1, column - 1);
+        Position end   = new Position(line - 1, (column - 1 + endPos - startPos));
+        return new Range(start, end);
     }
 }
