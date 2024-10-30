@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.common;
+package io.github.wmdietl.diagnostics.common;
 
 import java.util.List;
 import javax.tools.JavaFileObject;

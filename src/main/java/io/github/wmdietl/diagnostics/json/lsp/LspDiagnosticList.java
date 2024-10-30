@@ -7,8 +7,8 @@ import java.util.Map;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.json.common.DiagnosticList;
-import io.github.wmdietl.diagnostics.json.common.Diagnostic;
+import io.github.wmdietl.diagnostics.common.Diagnostic;
+import io.github.wmdietl.diagnostics.common.DiagnosticList;
 
 public class LspDiagnosticList extends DiagnosticList {
     public LspDiagnosticList(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {

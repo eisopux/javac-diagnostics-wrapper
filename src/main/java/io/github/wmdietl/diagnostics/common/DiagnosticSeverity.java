@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.common;
+package io.github.wmdietl.diagnostics.common;
 
 import javax.tools.Diagnostic.Kind;
 

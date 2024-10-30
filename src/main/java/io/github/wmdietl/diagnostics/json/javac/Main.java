@@ -4,7 +4,7 @@ import java.util.List;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
-import io.github.wmdietl.diagnostics.json.common.DiagnosticList;
+import io.github.wmdietl.diagnostics.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics as JSON, in a simple format directly corresponding to

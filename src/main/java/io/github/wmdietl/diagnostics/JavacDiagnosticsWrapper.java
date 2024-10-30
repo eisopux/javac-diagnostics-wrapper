@@ -16,8 +16,8 @@ import javax.tools.ToolProvider;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import io.github.wmdietl.diagnostics.json.common.Diagnostic;
-import io.github.wmdietl.diagnostics.json.common.DiagnosticList;
+import io.github.wmdietl.diagnostics.common.Diagnostic;
+import io.github.wmdietl.diagnostics.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics in an easily-configurable way.

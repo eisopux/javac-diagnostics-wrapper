@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.common;
+package io.github.wmdietl.diagnostics.common;
 
 /**
  * Range in a text document expressed as (zero-based) start and end positions. A range is
