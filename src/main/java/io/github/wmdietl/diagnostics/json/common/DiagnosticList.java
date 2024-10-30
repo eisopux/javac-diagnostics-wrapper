@@ -13,7 +13,7 @@ public abstract class DiagnosticList {
     }
 
     // Obtain the list of diagnostics in already processed form
-    public List<Diagnostic> geDiagnostics(){
+    public List<Diagnostic> getDiagnostics(){
         return diagnostics;
     }
 
