@@ -14,14 +14,14 @@ public class Position {
     public static final Position START = new Position(0, 0);
     
     /** Line position in a document (zero-based). */
-    public final int line;
+    public final long line;
     
     /**
      * Character offset on a line in a document (zero-based). Assuming that the line is represented
      * as a string, the `character` value represents the gap between the `character` and `character
      * + 1`.
      */
-    public final int character;
+    public final long character;
     
     /**
      * Create a new Position.
@@ -29,7 +29,7 @@ public class Position {
      * @param line line position in a document (zero-based)
      * @param character character offset on a line in a document (zero-based)
      */
-    public Position(int line, int character) {
+    public Position(long line, long character) {
         this.line = line;
         this.character = character;
     }
