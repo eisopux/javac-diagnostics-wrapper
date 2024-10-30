@@ -1,13 +1,9 @@
 package io.github.wmdietl.diagnostics.json.javac;
 
-import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
-/** 
- * JSON wrapper class. Fields are encoded in the JSON output.
- * Define one complete entry in the json output
- */
-public class JsonDiagnostic {
+public class JavacDiagnostic extends Diagnostic {
 
     public final String fileUri;
     public final String kind;
@@ -19,7 +15,7 @@ public class JsonDiagnostic {
     public final String code;
     public final String message;
 
-    JsonDiagnostic(Diagnostic<? extends JavaFileObject> diagnostic) {
+    JavacDiagnostic(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
         JavaFileObject file = diagnostic.getSource();
         fileUri = file != null ? file.toUri().toString() : "unknown file";
         kind = diagnostic.getKind().name();
