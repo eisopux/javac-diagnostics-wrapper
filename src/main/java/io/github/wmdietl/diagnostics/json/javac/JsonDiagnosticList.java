@@ -6,7 +6,10 @@ import java.util.List;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-/** JSON wrapper class. Fields are encoded in the JSON output. */
+/**
+ * JSON wrapper class. Fields are encoded in the JSON output.
+ * Define a list of json entries
+ */
 public class JsonDiagnosticList {
 
     private final List<JsonDiagnostic> diagnostics;
