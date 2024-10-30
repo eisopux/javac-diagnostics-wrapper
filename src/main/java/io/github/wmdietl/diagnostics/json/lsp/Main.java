@@ -4,7 +4,7 @@ import java.util.List;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
-import io.github.wmdietl.diagnostics.json.common.Diagnostic;
+import io.github.wmdietl.diagnostics.json.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics as JSON, in a simple format directly corresponding to
@@ -17,8 +17,7 @@ public class Main extends JavacDiagnosticsWrapper {
 
     /** Serialize the diagnostics using the LSP format. */
     @Override
-    protected List<Diagnostic> processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
-        LspDiagnosticList diags = new LspDiagnosticList(diagnostics);
-        return diags.getDiagnostics();
+    protected DiagnosticList processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
+        return new LspDiagnosticList(diagnostics);
     }
 }

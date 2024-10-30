@@ -17,6 +17,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import io.github.wmdietl.diagnostics.json.common.Diagnostic;
+import io.github.wmdietl.diagnostics.json.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics in an easily-configurable way.
@@ -49,7 +50,7 @@ public abstract class JavacDiagnosticsWrapper {
                 .call();
 
         // Obtain the processed results of a specific format
-        List<Diagnostic> result = processDiagnostics(diagnosticCollector.getDiagnostics());
+        List<Diagnostic> result = processDiagnostics(diagnosticCollector.getDiagnostics()).getDiagnostics();
 
         // Perform certain actions on result, such as write to a file or print to stdout
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -60,7 +61,7 @@ public abstract class JavacDiagnosticsWrapper {
      * Callback to handle the diagnostics from a compilation task. At the moment this outputs a JSON
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
-    protected abstract List<Diagnostic> processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics);
+    protected abstract DiagnosticList processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics);
 
     /**
      * Decode Java compiler options.
