@@ -1,18 +1,23 @@
 package io.github.wmdietl.diagnostics;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import javax.lang.model.SourceVersion;
-import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.OptionChecker;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
+
+import io.github.wmdietl.diagnostics.common.Diagnostic;
+import io.github.wmdietl.diagnostics.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics in an easily-configurable way.
@@ -35,25 +40,30 @@ public abstract class JavacDiagnosticsWrapper {
         Iterable<? extends JavaFileObject> javaFiles =
                 fileManager.getJavaFileObjectsFromFiles(options.getFiles());
 
-        boolean result =
-                javac.getTask(
-                                null,
-                                fileManager,
-                                diagnosticCollector,
-                                options.getRecognizedOptions(),
-                                options.getClassNames(),
-                                javaFiles)
-                        .call();
+        javac.getTask(
+                        null,
+                        fileManager,
+                        diagnosticCollector,
+                        options.getRecognizedOptions(),
+                        options.getClassNames(),
+                        javaFiles)
+                .call();
 
-        processDiagnostics(result, diagnosticCollector.getDiagnostics());
+        // Obtain the processed results of a specific format
+        List<Diagnostic> result =
+                processDiagnostics(diagnosticCollector.getDiagnostics()).getDiagnostics();
+
+        // Perform certain actions on result, such as write to a file or print to stdout
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        System.out.println(gson.toJson(result));
     }
 
     /**
      * Callback to handle the diagnostics from a compilation task. At the moment this outputs a JSON
      * message. In the future, maybe extend to have multiple subclasses for different formats.
      */
-    protected abstract void processDiagnostics(
-            boolean result, List<Diagnostic<? extends JavaFileObject>> diagnostics);
+    protected abstract DiagnosticList processDiagnostics(
+            List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics);
 
     /**
      * Decode Java compiler options.
