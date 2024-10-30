@@ -6,7 +6,10 @@ import javax.tools.JavaFileObject;
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
 import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
-/** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
+/**
+ * Wrapper around javac to output diagnostics as JSON, in a simple format directly corresponding to
+ * the javac diagnostics.
+ */
 public class Main extends JavacDiagnosticsWrapper {
     public static void main(String[] args) {
         new Main().run(args);
