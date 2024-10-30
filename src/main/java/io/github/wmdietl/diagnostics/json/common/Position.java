@@ -1,25 +1,28 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package io.github.wmdietl.diagnostics.json.common;
 
 /**
- * LSP position in a text document expressed as zero-based line and zero-based character offset. A
- * position is between two characters like an "insert" cursor in a editor. Special values like for
+ * Define a position in a file using the x and y coordinates
+ * y coordinates = line number
+ * x coordinates = offset from the beginning of the line
+ * 
+ * The positions in a text document use zero-based line and zero-based character offset.
+ * A position is between two characters like an "insert" cursor in a editor. Special values like for
  * example -1 to denote the end of a line are not supported.
  */
 public class Position {
-
     /** Use this when you have no position information. */
     public static final Position START = new Position(0, 0);
-
+    
     /** Line position in a document (zero-based). */
     public final int line;
-
+    
     /**
      * Character offset on a line in a document (zero-based). Assuming that the line is represented
      * as a string, the `character` value represents the gap between the `character` and `character
      * + 1`.
      */
     public final int character;
-
+    
     /**
      * Create a new Position.
      *
@@ -33,6 +36,6 @@ public class Position {
 
     @Override
     public String toString() {
-        return line + "," + character;
+        return "(" + line + "," + character + ")";
     }
 }

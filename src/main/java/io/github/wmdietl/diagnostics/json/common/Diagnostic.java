@@ -1,9 +1,9 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package io.github.wmdietl.diagnostics.json.common;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/** Represents an LSP diagnostic, such as a compiler error or warning. */
+/** Represents a diagnostic, such as a compiler error or warning. */
 public class Diagnostic {
     /** The range at which the message applies. */
     public final Range range;

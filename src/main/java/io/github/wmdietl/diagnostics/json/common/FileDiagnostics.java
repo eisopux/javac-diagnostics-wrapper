@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package io.github.wmdietl.diagnostics.json.common;
 
 import java.util.List;
 
