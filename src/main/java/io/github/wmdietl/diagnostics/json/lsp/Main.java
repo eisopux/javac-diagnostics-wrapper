@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
+import io.github.wmdietl.diagnostics.json.common.*;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
 public class Main extends JavacDiagnosticsWrapper {
@@ -29,6 +30,7 @@ public class Main extends JavacDiagnosticsWrapper {
             if (!fileDiagnostics.containsKey(source)) {
                 fileDiagnostics.put(source, new ArrayList<>());
             }
+            // d is a javax.tools.Diagnostic, and we want to convert to a Diagnostics that we defined
             fileDiagnostics.get(source).add(convert(d));
         }
 
