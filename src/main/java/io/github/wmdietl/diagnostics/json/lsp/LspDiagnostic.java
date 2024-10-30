@@ -1,15 +1,18 @@
 package io.github.wmdietl.diagnostics.json.lsp;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import javax.tools.JavaFileObject;
+
 import io.github.wmdietl.diagnostics.json.common.Range;
+import io.github.wmdietl.diagnostics.json.common.DiagnosticSeverity;
+import io.github.wmdietl.diagnostics.json.common.Diagnostic;
 
 /** 
  * A file plus a list of diagnostics for that file.
  * Define one complete entry in json output
  */
-public class JsonDiagnostic {
+public class LspDiagnostic extends Diagnostic {
     /** The URI for which diagnostic information is reported. */
     public final String uri;
 
@@ -22,7 +25,7 @@ public class JsonDiagnostic {
      * @param uri the URI for which diagnostic information is reported
      * @param diagnostics diagnostic information items
      */
-    public JsonDiagnostic(String uri, List<Diagnostic> diagnostics) {
+    public LspDiagnostic(String uri, List<Diagnostic> diagnostics) {
         this.uri = uri;
         this.diagnostics = diagnostics;
     }
@@ -53,30 +56,18 @@ public class JsonDiagnostic {
         /** Additional metadata about the diagnostic. */
         public final List<Integer> tags;
 
-        /**
-         * Create a Diagnostic using all arguments.
-         *
-         * @param range the range at which the message applies
-         * @param severity the diagnostic's severity
-         * @param code the diagnostic's code, which might appear in the user interface
-         * @param source A human-readable string describing the source of this diagnostic, e.g.
-         *     'typescript' or 'super lint'.
-         * @param message the diagnostic's message
-         * @param tags additional metadata about the diagnostic
-         */
-        public Diagnostic(
-                Range range,
-                Integer severity,
-                String code,
-                String source,
-                String message,
-                List<Integer> tags) {
-            this.range = range;
-            this.severity = severity;
-            this.code = code;
-            this.source = source;
-            this.message = message;
-            this.tags = (tags == null ? null : new ArrayList<>(tags));
+        /** Create a Diagnostic using standard javac diagnostic. */
+        public Diagnostic(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
+            // Convert from javac error locations to self-defined range
+            this.range = new Range(
+                diagnostic.getLineNumber(), diagnostic.getColumnNumber(),
+                diagnostic.getStartPosition(), diagnostic.getEndPosition());
+            // Convert from javac severity to self-defined severity
+            this.severity = DiagnosticSeverity.convert(diagnostic.getKind()).value;
+            this.code = diagnostic.getCode();
+            this.source = getClass().getCanonicalName();
+            this.message = diagnostic.getMessage(null);
+            this.tags = null;
         }
     }
 }
