@@ -8,10 +8,10 @@ package io.github.wmdietl.diagnostics.json.common;
  */
 public class Range {
     /** The range's start position. */
-    public Position start;
+    final public Position start;
 
     /** The range's end position. */
-    public Position end;
+    final public Position end;
 
     /**
      * Create a new Range from javac standard diagnostic output
