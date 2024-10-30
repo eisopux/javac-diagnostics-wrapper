@@ -8,10 +8,7 @@ import io.github.wmdietl.diagnostics.common.Diagnostic;
 import io.github.wmdietl.diagnostics.common.DiagnosticSeverity;
 import io.github.wmdietl.diagnostics.common.Range;
 
-/** 
- * A file plus a list of diagnostics for that file.
- * Define one complete entry in json output
- */
+/** A file plus a list of diagnostics for that file. Define one complete entry in json output */
 public class LspDiagnostic implements Diagnostic {
     /** The URI for which diagnostic information is reported. */
     public final String uri;
@@ -45,8 +42,8 @@ public class LspDiagnostic implements Diagnostic {
         public final String code;
 
         /**
-         * A human-readable string describing the source of this diagnostic, e.g. 'typescript' or 'super
-         * lint'.
+         * A human-readable string describing the source of this diagnostic, e.g. 'typescript' or
+         * 'super lint'.
          */
         public final String source;
 
@@ -59,9 +56,10 @@ public class LspDiagnostic implements Diagnostic {
         /** Create a Diagnostic using standard javac diagnostic. */
         public Diagnostic(javax.tools.Diagnostic<? extends JavaFileObject> diagnostic) {
             // Convert from javac error locations to self-defined range
-            this.range = new Range(
-                diagnostic.getLineNumber(), diagnostic.getColumnNumber(),
-                diagnostic.getStartPosition(), diagnostic.getEndPosition());
+            this.range =
+                    new Range(
+                            diagnostic.getLineNumber(), diagnostic.getColumnNumber(),
+                            diagnostic.getStartPosition(), diagnostic.getEndPosition());
             // Convert from javac severity to self-defined severity
             this.severity = DiagnosticSeverity.convert(diagnostic.getKind()).value;
             this.code = diagnostic.getCode();

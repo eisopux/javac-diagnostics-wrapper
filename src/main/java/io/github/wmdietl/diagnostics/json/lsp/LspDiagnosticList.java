@@ -17,7 +17,8 @@ public class LspDiagnosticList extends DiagnosticList {
     }
 
     @Override
-    protected List<Diagnostic> convertOrg(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
+    protected List<Diagnostic> convertOrg(
+            List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<LspDiagnostic.Diagnostic>> fileDiagnostics = new HashMap<>();
         for (javax.tools.Diagnostic<? extends JavaFileObject> d : diags) {
@@ -28,10 +29,11 @@ public class LspDiagnosticList extends DiagnosticList {
             if (!fileDiagnostics.containsKey(source)) {
                 fileDiagnostics.put(source, new ArrayList<>());
             }
-            // d is a javax.tools.Diagnostic, and we want to convert to a Diagnostics that we defined
+            // d is a javax.tools.Diagnostic, and we want to convert to a Diagnostics that we
+            // defined
             fileDiagnostics.get(source).add(new LspDiagnostic.Diagnostic(d));
         }
-        
+
         // Convert to FileDiagnostics for JSON identifiers
         List<Diagnostic> jsonDiagnostics = new ArrayList<>();
         for (Map.Entry<String, List<LspDiagnostic.Diagnostic>> entry : fileDiagnostics.entrySet()) {

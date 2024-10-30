@@ -1,6 +1,7 @@
 package io.github.wmdietl.diagnostics.json.javac;
 
 import java.util.List;
+
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
@@ -17,7 +18,8 @@ public class Main extends JavacDiagnosticsWrapper {
 
     /** Serialize the diagnostics using Gson. */
     @Override
-    protected DiagnosticList processDiagnostics(List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
+    protected DiagnosticList processDiagnostics(
+            List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
         return new JavacDiagnosticList(diagnostics);
     }
 }

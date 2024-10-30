@@ -30,7 +30,7 @@ public enum DiagnosticSeverity {
 
     /**
      * Convert from javac diagnostic Kind to DiagnosticSeverity
-     * 
+     *
      * @param kind the severity of the diagnostic produced by javac
      */
     public static DiagnosticSeverity convert(final Kind kind) throws IllegalArgumentException {

@@ -15,9 +15,10 @@ public class JavacDiagnosticList extends DiagnosticList {
     }
 
     @Override
-    protected List<Diagnostic> convertOrg(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
+    protected List<Diagnostic> convertOrg(
+            List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         List<Diagnostic> processed = new ArrayList<>();
-        for(javax.tools.Diagnostic<? extends JavaFileObject> d : diags){
+        for (javax.tools.Diagnostic<? extends JavaFileObject> d : diags) {
             processed.add(new JavacDiagnostic(d));
         }
         return processed;

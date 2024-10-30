@@ -1,6 +1,7 @@
 package io.github.wmdietl.diagnostics.common;
 
 import java.util.List;
+
 import javax.tools.JavaFileObject;
 
 public abstract class DiagnosticList {
@@ -13,10 +14,11 @@ public abstract class DiagnosticList {
     }
 
     // Obtain the list of diagnostics in already processed form
-    public List<Diagnostic> getDiagnostics(){
+    public List<Diagnostic> getDiagnostics() {
         return diagnostics;
     }
 
     // Convert from standard javac diagnostic to a specific format
-    protected abstract List<Diagnostic> convertOrg(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags);
+    protected abstract List<Diagnostic> convertOrg(
+            List<javax.tools.Diagnostic<? extends JavaFileObject>> diags);
 }
