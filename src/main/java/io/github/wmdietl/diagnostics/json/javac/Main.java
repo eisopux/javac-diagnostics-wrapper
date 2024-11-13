@@ -1,11 +1,11 @@
 package io.github.wmdietl.diagnostics.json.javac;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.List;
 
 import javax.tools.JavaFileObject;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
 import io.github.wmdietl.diagnostics.common.DiagnosticList;

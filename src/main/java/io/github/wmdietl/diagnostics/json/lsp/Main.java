@@ -1,11 +1,11 @@
 package io.github.wmdietl.diagnostics.json.lsp;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.List;
 
 import javax.tools.JavaFileObject;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
 import io.github.wmdietl.diagnostics.common.DiagnosticList;
@@ -24,7 +24,7 @@ public class Main extends JavacDiagnosticsWrapper {
     protected void processDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
         DiagnosticList list = new LspDiagnosticList(diagnostics);
-        
+
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         System.out.println(gson.toJson(list.getDiagnostics()));
     }
