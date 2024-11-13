@@ -8,7 +8,6 @@ import java.util.List;
 import javax.tools.JavaFileObject;
 
 import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
-import io.github.wmdietl.diagnostics.common.DiagnosticList;
 
 /**
  * Wrapper around javac to output diagnostics as JSON, in a simple format directly corresponding to
@@ -23,9 +22,9 @@ public class Main extends JavacDiagnosticsWrapper {
     @Override
     protected void processDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diagnostics) {
-        DiagnosticList list = new JavacDiagnosticList(diagnostics);
+        JavacDiagnosticList list = new JavacDiagnosticList(diagnostics);
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        System.out.println(gson.toJson(list.getDiagnostics()));
+        System.out.println(gson.toJson(list.diagnostics));
     }
 }

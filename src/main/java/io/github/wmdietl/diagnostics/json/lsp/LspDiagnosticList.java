@@ -7,17 +7,15 @@ import java.util.Map;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.common.Diagnostic;
-import io.github.wmdietl.diagnostics.common.DiagnosticList;
+public class LspDiagnosticList {
 
-public class LspDiagnosticList extends DiagnosticList {
+    public final List<LspDiagnostic> diagnostics;
+
     public LspDiagnosticList(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
-        // When this object is created, delegate construction to the constructor of the super class
-        super(diags);
+        diagnostics = convertStandardDiagnostics(diags);
     }
 
-    @Override
-    protected List<Diagnostic> convertStandardDiagnostics(
+    private List<LspDiagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<LspDiagnostic.Diagnostic>> fileDiagnostics = new HashMap<>();
@@ -35,7 +33,7 @@ public class LspDiagnosticList extends DiagnosticList {
         }
 
         // Convert to FileDiagnostics for JSON identifiers
-        List<Diagnostic> jsonDiagnostics = new ArrayList<>();
+        List<LspDiagnostic> jsonDiagnostics = new ArrayList<>();
         for (Map.Entry<String, List<LspDiagnostic.Diagnostic>> entry : fileDiagnostics.entrySet()) {
             jsonDiagnostics.add(new LspDiagnostic(entry.getKey(), entry.getValue()));
         }

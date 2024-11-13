@@ -5,19 +5,18 @@ import java.util.List;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.common.Diagnostic;
-import io.github.wmdietl.diagnostics.common.DiagnosticList;
+public class JavacDiagnosticList {
 
-public class JavacDiagnosticList extends DiagnosticList {
+    // The list that contains all diagnostics
+    public final List<JavacDiagnostic> diagnostics;
+
     public JavacDiagnosticList(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
-        // When this object is created, delegate construction to the constructor of the super class
-        super(diags);
+        diagnostics = convertStandardDiagnostics(diags);
     }
 
-    @Override
-    protected List<Diagnostic> convertStandardDiagnostics(
+    private List<JavacDiagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
-        List<Diagnostic> processed = new ArrayList<>();
+        List<JavacDiagnostic> processed = new ArrayList<>();
         for (javax.tools.Diagnostic<? extends JavaFileObject> d : diags) {
             processed.add(new JavacDiagnostic(d));
         }

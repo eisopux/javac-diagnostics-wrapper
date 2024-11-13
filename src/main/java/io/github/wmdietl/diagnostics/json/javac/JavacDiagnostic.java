@@ -2,9 +2,7 @@ package io.github.wmdietl.diagnostics.json.javac;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.common.Diagnostic;
-
-public class JavacDiagnostic implements Diagnostic {
+public class JavacDiagnostic {
 
     public final String fileUri;
     public final String kind;

@@ -4,12 +4,11 @@ import java.util.List;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.common.Diagnostic;
 import io.github.wmdietl.diagnostics.common.DiagnosticSeverity;
 import io.github.wmdietl.diagnostics.common.Range;
 
 /** A file plus a list of diagnostics for that file. Define one complete entry in json output */
-public class LspDiagnostic implements Diagnostic {
+public class LspDiagnostic {
     /** The URI for which diagnostic information is reported. */
     public final String uri;
 
