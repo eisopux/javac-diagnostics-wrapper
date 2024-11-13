@@ -10,7 +10,7 @@ public abstract class DiagnosticList {
     private final List<Diagnostic> diagnostics;
 
     public DiagnosticList(List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
-        diagnostics = convertOrg(diags);
+        diagnostics = convertStandardDiagnostics(diags);
     }
 
     // Obtain the list of diagnostics in already processed form
@@ -19,6 +19,6 @@ public abstract class DiagnosticList {
     }
 
     // Convert from standard javac diagnostic to a specific format
-    protected abstract List<Diagnostic> convertOrg(
+    protected abstract List<Diagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags);
 }

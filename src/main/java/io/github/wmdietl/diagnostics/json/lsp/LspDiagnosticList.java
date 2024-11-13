@@ -17,7 +17,7 @@ public class LspDiagnosticList extends DiagnosticList {
     }
 
     @Override
-    protected List<Diagnostic> convertOrg(
+    protected List<Diagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         // Mapping from unique URIs to the diagnostics for that URI
         Map<String, List<LspDiagnostic.Diagnostic>> fileDiagnostics = new HashMap<>();
