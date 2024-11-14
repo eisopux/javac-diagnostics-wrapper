@@ -2,9 +2,9 @@ package io.github.wmdietl.diagnostics.json.lsp;
 
 import java.util.List;
 
+import javax.tools.Diagnostic.Kind;
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.common.DiagnosticSeverity;
 import io.github.wmdietl.diagnostics.common.Range;
 
 /** A file plus a list of diagnostics for that file. Define one complete entry in json output */
@@ -59,12 +59,33 @@ public class LspDiagnostic {
                     new Range(
                             diagnostic.getLineNumber(), diagnostic.getColumnNumber(),
                             diagnostic.getStartPosition(), diagnostic.getEndPosition());
-            // Convert from javac severity to self-defined severity
-            this.severity = DiagnosticSeverity.convert(diagnostic.getKind()).value;
+            // Convert from javac severity to LSP severity
+            this.severity = mapSeverity(diagnostic.getKind()).severity;
             this.code = diagnostic.getCode();
             this.source = getClass().getCanonicalName();
             this.message = diagnostic.getMessage(null);
             this.tags = null;
+        }
+
+        /**
+         * Convert from javac diagnostic Kind to DiagnosticSeverity.
+         *
+         * @param kind the severity of the diagnostic produced by javac
+         */
+        private static LspDiagnosticSeverity mapSeverity(final Kind kind)
+                throws IllegalArgumentException {
+            switch (kind) {
+                case ERROR:
+                    return LspDiagnosticSeverity.ERROR;
+                case WARNING:
+                case MANDATORY_WARNING:
+                    return LspDiagnosticSeverity.WARNING;
+                case NOTE:
+                case OTHER:
+                    return LspDiagnosticSeverity.INFORMATION;
+                default:
+                    throw new IllegalArgumentException("Unexpected diagnostic kind");
+            }
         }
     }
 }
