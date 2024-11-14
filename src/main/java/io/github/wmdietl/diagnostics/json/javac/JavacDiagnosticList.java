@@ -14,6 +14,7 @@ public class JavacDiagnosticList {
         diagnostics = convertStandardDiagnostics(diags);
     }
 
+    // Convert from a list of standard javac diagnostics to a list of JavacDiagnostic (um, ok...)
     private List<JavacDiagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         List<JavacDiagnostic> processed = new ArrayList<>();

@@ -15,6 +15,7 @@ public class LspDiagnosticList {
         diagnostics = convertStandardDiagnostics(diags);
     }
 
+    // Convert from a list of standard javac diagnostics to a list of LspDiagnostic
     private List<LspDiagnostic> convertStandardDiagnostics(
             List<javax.tools.Diagnostic<? extends JavaFileObject>> diags) {
         // Mapping from unique URIs to the diagnostics for that URI
