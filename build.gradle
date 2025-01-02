@@ -5,7 +5,8 @@
 plugins {
     id 'java'
     id 'application'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
+    // https://plugins.gradle.org/plugin/com.gradleup.shadow
+    id 'com.gradleup.shadow' version '8.3.5'
     id 'com.diffplug.spotless' version '6.25.0'
     id 'net.ltgt.errorprone' version '4.1.0'
 }
@@ -17,8 +18,10 @@ repositories {
 dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
     testImplementation 'junit:junit:4.13.2'
-    errorprone('com.google.errorprone:error_prone_core:2.31.0')
-    errorproneJavac('com.google.errorprone:javac:9+181-r4173-1')
+    if (JavaVersion.current() >= JavaVersion.VERSION_17) {
+        errorprone('com.google.errorprone:error_prone_core:2.36.0')
+        errorproneJavac('com.google.errorprone:javac:9+181-r4173-1')
+    }
 }
 
 application {
@@ -26,7 +29,9 @@ application {
     mainClass = 'io.github.wmdietl.diagnostics.json.lsp.Main'
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile) { compilationTask ->
+    options.compilerArgs += ['-Xlint:-options', '-Werror']
+    options.errorprone.enabled = JavaVersion.current() >= JavaVersion.VERSION_17
     sourceCompatibility = 8
     targetCompatibility = 8
 }
@@ -39,5 +44,12 @@ spotless {
         googleJavaFormat().aosp()
         importOrder('com', 'jdk', 'lib', 'lombok', 'org', 'java', 'javax')
         formatAnnotations()
+    }
+    groovyGradle {
+        target '*.gradle'
+        importOrder()
+        greclipse()  // which formatter Spotless should use to format .gradle files.
+        indentWithSpaces(4)
+        trimTrailingWhitespace()
     }
 }

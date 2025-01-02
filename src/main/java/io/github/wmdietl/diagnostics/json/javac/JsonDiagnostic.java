@@ -6,7 +6,7 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
 /** JSON wrapper class. Fields are encoded in the JSON output. */
-public class JsonDiagnostic implements Diagnostic {
+public class JsonDiagnostic implements Diagnostic<Object> {
 
     private final String fileUri;
     private final String kind;
