@@ -1,5 +1,6 @@
 package org.eisopux.diagnostics.collectors;
 
+import org.eisopux.diagnostics.core.ConsoleRenderable;
 import org.eisopux.diagnostics.core.JavacCollector;
 
 import javax.tools.Diagnostic;
@@ -11,7 +12,7 @@ import java.util.List;
  * A concrete implementation of {@link JavacCollector} that wraps a
  * {@link DiagnosticCollector} to capture compilation diagnostics.
  */
-public class DiagnosticCollectorImpl implements JavacCollector {
+public class DiagnosticCollectorImpl implements JavacCollector, ConsoleRenderable {
 
     // The underlying DiagnosticCollector that javac needs.
     private final DiagnosticCollector<JavaFileObject> diagCollector =
@@ -54,5 +55,21 @@ public class DiagnosticCollectorImpl implements JavacCollector {
      */
     public List<Diagnostic<? extends JavaFileObject>> getDiagnostics() {
         return finalDiagnostics;
+    }
+
+    @Override
+    public String toConsoleString() {
+        if (finalDiagnostics == null || finalDiagnostics.isEmpty()) {
+            return "No diagnostics.\n";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (Diagnostic<? extends JavaFileObject> diag : finalDiagnostics) {
+            sb.append("Kind: ").append(diag.getKind())
+                    .append(", Message: ").append(diag.getMessage(null))
+                    .append(", at: ").append(diag.getSource())
+                    .append(":").append(diag.getLineNumber())
+                    .append("\n");
+        }
+        return sb.toString();
     }
 }
