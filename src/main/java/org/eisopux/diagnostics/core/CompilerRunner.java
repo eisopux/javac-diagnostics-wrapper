@@ -15,9 +15,16 @@ import java.util.List;
 public class CompilerRunner {
 
     private final List<JavacCollector> collectors = new ArrayList<>();
+    private FormatReporter reporter;
+
 
     public CompilerRunner addCollector(JavacCollector collector) {
         collectors.add(collector);
+        return this;
+    }
+
+    public CompilerRunner setReporter(FormatReporter reporter) {
+        this.reporter = reporter;
         return this;
     }
 
@@ -48,7 +55,7 @@ public class CompilerRunner {
         Iterable<? extends JavaFileObject> javaFiles =
                 fileManager.getJavaFileObjectsFromFiles(options.getFiles());
 
-        // 6. Create and call the compilation task
+        // 6. Create the compilation task
         JavaCompiler.CompilationTask task = javac.getTask(
                 null, // default Writer (System.err)
                 fileManager,
@@ -58,20 +65,25 @@ public class CompilerRunner {
                 javaFiles
         );
 
+        // 7. Register task-aware collectors
+        for (JavacCollector collector : collectors) {
+            if (collector instanceof TaskAwareCollector) {
+                ((TaskAwareCollector) collector).registerWithTask(task);
+            }
+        }
+
+        // 8. Call the compilation task
         boolean success = task.call();
 
-        // 7. Call onAfterCompile(success) for each collector
+        // 9. Call onAfterCompile(success) for each collector
         collectors.forEach(c -> c.onAfterCompile(success));
 
-        // 8. (Temporary) Print the collected diagnostics to console
-        DiagnosticCollectorImpl dcImpl = findCollector(DiagnosticCollectorImpl.class);
-        if (dcImpl != null) {
-            System.out.println("Compilation " + (success ? "Succeeded" : "Failed"));
-            dcImpl.getDiagnostics().forEach(d -> {
-                System.out.println("Kind: " + d.getKind()
-                        + ", Message: " + d.getMessage(null)
-                        + ", at: " + d.getSource() + ":" + d.getLineNumber());
-            });
+        // 10. Print the collected diagnostics to console
+        if (reporter != null) {
+            String resultOutput = reporter.generateReport(collectors, success);
+            System.out.println(resultOutput);
+        } else {
+            System.out.println("No reporter found");
         }
     }
 
