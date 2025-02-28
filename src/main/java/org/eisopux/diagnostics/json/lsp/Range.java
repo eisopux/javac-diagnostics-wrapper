@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package org.eisopux.diagnostics.json.lsp;
 
 /**
  * LSP range in a text document expressed as (zero-based) start and end positions. A range is

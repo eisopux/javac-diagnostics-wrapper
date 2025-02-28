@@ -27,14 +27,14 @@ use
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    io.github.wmdietl.diagnostics.json.lsp.Main \
+    lsp.json.org.eisopux.diagnostics.Main \
     [flags] File1.java File2.java
 ```
 (where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
 There are currently two supported output formats:
-- `io.github.wmdietl.diagnostics.json.lsp.Main` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
-- `io.github.wmdietl.diagnostics.json.javac.Main` produces output in a JSON format
+- `lsp.json.org.eisopux.diagnostics.Main` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
+- `javac.json.org.eisopux.diagnostics.Main` produces output in a JSON format
    directly corresponding to the javac diagnostics.
 
 
@@ -45,7 +45,7 @@ Normal compilation of a file with errors, using the javac format:
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    io.github.wmdietl.diagnostics.json.javac.Main \
+    javac.json.org.eisopux.diagnostics.Main \
     File1.java
 ```
 
@@ -86,7 +86,7 @@ using the LSP format:
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    io.github.wmdietl.diagnostics.json.lsp.Main \
+    lsp.json.org.eisopux.diagnostics.Main \
     -classpath /path/to/checker-framework/checker/dist/checker.jar \
     -processor org.checkerframework.checker.nullness.NullnessChecker \
     File2.java

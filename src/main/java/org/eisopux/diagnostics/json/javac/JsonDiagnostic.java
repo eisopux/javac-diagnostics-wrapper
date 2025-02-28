@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.javac;
+package org.eisopux.diagnostics.json.javac;
 
 import java.util.Locale;
 

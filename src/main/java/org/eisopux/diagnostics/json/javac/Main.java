@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.javac;
+package org.eisopux.diagnostics.json.javac;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,7 +8,7 @@ import java.util.List;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
+import org.eisopux.diagnostics.JavacDiagnosticsWrapper;
 
 /**
  * Wrapper around javac to output diagnostics as JSON, in a simple format directly corresponding to

@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package org.eisopux.diagnostics.json.lsp;
 
 /**
  * LSP position in a text document expressed as zero-based line and zero-based character offset. A

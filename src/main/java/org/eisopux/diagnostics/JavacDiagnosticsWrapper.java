@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics;
+package org.eisopux.diagnostics;
 
 import java.io.File;
 import java.util.ArrayList;

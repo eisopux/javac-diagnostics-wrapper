@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package org.eisopux.diagnostics.json.lsp;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 import javax.tools.JavaFileObject;
 
-import io.github.wmdietl.diagnostics.JavacDiagnosticsWrapper;
+import org.eisopux.diagnostics.JavacDiagnosticsWrapper;
 
 /** Wrapper around javac to output diagnostics as JSON, in the LSP format. */
 public class Main extends JavacDiagnosticsWrapper {

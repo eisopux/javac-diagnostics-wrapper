@@ -1,4 +1,4 @@
-package io.github.wmdietl.diagnostics.json.lsp;
+package org.eisopux.diagnostics.json.lsp;
 
 import java.util.ArrayList;
 import java.util.List;
