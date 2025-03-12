@@ -1,32 +1,17 @@
 package org.eisopux.diagnostics.reporter;
 
-import org.eisopux.diagnostics.core.ConsoleRenderable;
-import org.eisopux.diagnostics.core.FormatReporter;
-import org.eisopux.diagnostics.core.JavacCollector;
+import org.eisopux.diagnostics.core.Collector;
+import org.eisopux.diagnostics.core.Reporter;
 
 import java.util.List;
 
-/**
- * A very simple reporter that outputs compile success/failure
- * and then delegates console rendering to any collector
- * that implements {@link ConsoleRenderable}.
- */
-public class ConsoleReporter implements FormatReporter {
+/** A very simple reporter that outputs raw collector data to the console. */
+public class ConsoleReporter implements Reporter {
 
     @Override
-    public String generateReport(List<JavacCollector> collectors, boolean compileSuccess) {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("Compilation ")
-                .append(compileSuccess ? "Succeeded" : "Failed")
-                .append("\n");
-
-        for (JavacCollector collector : collectors) {
-            if (collector instanceof ConsoleRenderable) {
-                sb.append(((ConsoleRenderable) collector).toConsoleString())
-                        .append("\n");
-            }
+    public void generateReport(List<? extends Collector<?>> collectors) {
+        for (Collector<?> collector : collectors) {
+            System.out.println(collector.getItems());
         }
-        return sb.toString();
     }
 }

@@ -1,8 +1,7 @@
 package org.eisopux.diagnostics.utility;
 
 /**
- * Simple DTO for storing information
- * about an annotation processor discovered during compilation.
+ * Simple DTO for storing information about an annotation processor discovered during compilation.
  */
 public class ProcessorInfo {
 
@@ -15,9 +14,9 @@ public class ProcessorInfo {
      * Constructs a ProcessorInfo.
      *
      * @param className the fully qualified class name of the processor
-     * @param version   the implementation or specification version, if available
-     * @param title     the package implementation title, if available
-     * @param vendor    the package implementation vendor, if available
+     * @param version the implementation or specification version, if available
+     * @param title the package implementation title, if available
+     * @param vendor the package implementation vendor, if available
      */
     public ProcessorInfo(String className, String version, String title, String vendor) {
         this.className = className;
@@ -44,11 +43,19 @@ public class ProcessorInfo {
 
     @Override
     public String toString() {
-        return "ProcessorInfo{" +
-                "className='" + className + '\'' +
-                ", version='" + version + '\'' +
-                ", title='" + title + '\'' +
-                ", vendor='" + vendor + '\'' +
-                '}';
+        return "ProcessorInfo{"
+                + "className='"
+                + className
+                + '\''
+                + ", version='"
+                + version
+                + '\''
+                + ", title='"
+                + title
+                + '\''
+                + ", vendor='"
+                + vendor
+                + '\''
+                + '}';
     }
 }

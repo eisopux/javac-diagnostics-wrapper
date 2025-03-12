@@ -1,30 +1,24 @@
 package org.eisopux.diagnostics.core;
 
-import org.eisopux.diagnostics.collectors.DiagnosticCollectorImpl;
-
-import javax.lang.model.SourceVersion;
-import javax.tools.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * A runner that sets up the javac task, attaches collectors, and runs the compilation.
- */
+import javax.lang.model.SourceVersion;
+import javax.tools.*;
+
+/** A runner that sets up the javac task, attaches collectors, and runs the compilation. */
 public class CompilerRunner {
 
-    private final List<JavacCollector> collectors = new ArrayList<>();
-    private FormatReporter reporter;
+    private final List<Collector<?>> collectors = new ArrayList<>();
 
-
-    public CompilerRunner addCollector(JavacCollector collector) {
-        collectors.add(collector);
+    public CompilerRunner addCollector(Collector<?> collector) {
+        this.collectors.add(collector);
         return this;
     }
 
-    public CompilerRunner setReporter(FormatReporter reporter) {
-        this.reporter = reporter;
+    public CompilerRunner setReporter(Reporter reporter) {
         return this;
     }
 
@@ -46,66 +40,36 @@ public class CompilerRunner {
         }
 
         // 3. Call onBeforeCompile() for each collector
-        collectors.forEach(JavacCollector::onBeforeCompile);
+        collectors.forEach(Collector::onBeforeCompile);
 
-        // 4. Find the DiagnosticCollectorImpl, if present, so we can pass its underlying collector to javac
-        DiagnosticCollector<JavaFileObject> diagCollector = findDiagnosticCollector();
-
-        // 5. Prepare the compilation input
+        // 4. Prepare the compilation input
         Iterable<? extends JavaFileObject> javaFiles =
                 fileManager.getJavaFileObjectsFromFiles(options.getFiles());
 
-        // 6. Create the compilation task
-        JavaCompiler.CompilationTask task = javac.getTask(
-                null, // default Writer (System.err)
-                fileManager,
-                diagCollector, // pass the collector if found, otherwise null
-                options.getRecognizedOptions(),
-                options.getClassNames(),
-                javaFiles
-        );
+        // 5. Create the compilation task
+        JavaCompiler.CompilationTask task =
+                javac.getTask(
+                        null, // default Writer (System.err)
+                        fileManager,
+                        null, // We'll let collectors attach themselves
+                        options.getRecognizedOptions(),
+                        options.getClassNames(),
+                        javaFiles);
 
-        // 7. Register task-aware collectors
-        for (JavacCollector collector : collectors) {
-            if (collector instanceof TaskAwareCollector) {
-                ((TaskAwareCollector) collector).registerWithTask(task);
-            }
-        }
+        // 6. Register task-aware collectors
+        //        for (JavacCollector collector : collectors) {
+        //            if (collector instanceof TaskAwareCollector) {
+        //                ((TaskAwareCollector) collector).registerWithTask(task);
+        //            }
+        //        }
+
+        collectors.forEach(collector -> collector.attachToTask(task));
 
         // 8. Call the compilation task
         boolean success = task.call();
 
         // 9. Call onAfterCompile(success) for each collector
         collectors.forEach(c -> c.onAfterCompile(success));
-
-        // 10. Print the collected diagnostics to console
-        if (reporter != null) {
-            String resultOutput = reporter.generateReport(collectors, success);
-            System.out.println(resultOutput);
-        } else {
-            System.out.println("No reporter found");
-        }
-    }
-
-    /**
-     * Look for a DiagnosticCollectorImpl among our registered collectors.
-     * Return null if none is found.
-     */
-    private DiagnosticCollector<JavaFileObject> findDiagnosticCollector() {
-        DiagnosticCollectorImpl impl = findCollector(DiagnosticCollectorImpl.class);
-        return impl == null ? null : impl.getUnderlyingCollector();
-    }
-
-    /**
-     * Utility to find a collector of a given type among our registered collectors.
-     */
-    private <T extends JavacCollector> T findCollector(Class<T> type) {
-        for (JavacCollector c : collectors) {
-            if (type.isInstance(c)) {
-                return type.cast(c);
-            }
-        }
-        return null;
     }
 
     private static final class JavacOptions {
@@ -114,10 +78,11 @@ public class CompilerRunner {
         private final List<File> files;
         private final List<String> unrecognizedOptions;
 
-        private JavacOptions(List<String> recognizedOptions,
-                             List<String> classNames,
-                             List<File> files,
-                             List<String> unrecognizedOptions) {
+        private JavacOptions(
+                List<String> recognizedOptions,
+                List<String> classNames,
+                List<File> files,
+                List<String> unrecognizedOptions) {
             this.recognizedOptions = recognizedOptions;
             this.classNames = classNames;
             this.files = files;
@@ -159,9 +124,7 @@ public class CompilerRunner {
                 }
             }
 
-            return new JavacOptions(
-                    recognizedOptions, classNames, files, unrecognizedOptions
-            );
+            return new JavacOptions(recognizedOptions, classNames, files, unrecognizedOptions);
         }
 
         public List<String> getRecognizedOptions() {
@@ -184,8 +147,7 @@ public class CompilerRunner {
         public String toString() {
             return String.format(
                     "recognizedOptions = %s; classNames = %s; files = %s; unrecognizedOptions = %s",
-                    recognizedOptions, classNames, files, unrecognizedOptions
-            );
+                    recognizedOptions, classNames, files, unrecognizedOptions);
         }
     }
 }
