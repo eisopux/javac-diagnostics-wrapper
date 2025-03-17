@@ -1,5 +1,7 @@
 package org.eisopux.diagnostics.core;
 
+import org.eisopux.diagnostics.utility.CompilationReportData;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,9 +31,12 @@ public class CompilerRunner {
         JavaCompiler.CompilationTask task = builder.build();
 
         boolean success = task.call();
-        collectors.forEach(c -> c.onAfterCompile());
+
+        CompilationReportData reportData = new CompilationReportData();
+
+        collectors.forEach(c -> c.onAfterCompile(reportData));
 
         if (success) {}
-        reporter.generateReport(collectors);
+        reporter.generateReport(reportData);
     }
 }
