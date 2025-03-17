@@ -1,13 +1,11 @@
 package org.eisopux.diagnostics.collectors;
 
 import org.eisopux.diagnostics.core.Collector;
+import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.tools.Diagnostic;
-import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 
 /**
@@ -22,32 +20,33 @@ public class DiagnosticCollector implements Collector<Diagnostic<? extends JavaF
     private List<Diagnostic<? extends JavaFileObject>> finalDiagnostics;
 
     @Override
-    public void onBeforeCompile() {
-        // no-op
+    public void onBeforeCompile(CompilationTaskBuilder builder) {
+        builder.addDiagnosticListener(diagCollector);
     }
 
     @Override
-    public void attachToTask(JavaCompiler.CompilationTask task) {
-        try {
-            Field contextField = task.getClass().getSuperclass().getDeclaredField("context");
-            contextField.setAccessible(true);
-            Object context = contextField.get(task);
+    public void onAfterCompile() {
+        // Finalize diagnostics.
+        this.finalDiagnostics = diagCollector.getDiagnostics();
 
-            Method putMethod = context.getClass().getMethod("put", Class.class, Object.class);
-            putMethod.invoke(context, javax.tools.DiagnosticListener.class, this.diagCollector);
-
-            System.out.println("Successfully attached diagnostic listener via context.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(
-                    "Failed to attach diagnostic listener via reflection using context", e);
-        }
-    }
-
-    @Override
-    public void onAfterCompile(boolean success) {
-        // Gather final diagnostics
-        finalDiagnostics = diagCollector.getDiagnostics();
+        //        // Prepare a section (as a Map) for diagnostics.
+        //        Map<String, Object> sectionData = new HashMap<>();
+        //        int count = finalDiagnostics != null ? finalDiagnostics.size() : 0;
+        //        sectionData.put("diagnosticCount", count);
+        //        if (finalDiagnostics != null) {
+        //            // Build a list of diagnostic details.
+        //            List<Map<String, Object>> details = finalDiagnostics.stream().map(diag -> {
+        //                Map<String, Object> diagMap = new HashMap<>();
+        //                // Define keys for the reporter to understand.
+        //                diagMap.put("message", diag.getMessage(null));
+        //                diagMap.put("lineNumber", diag.getLineNumber());
+        //                // Additional keys can be added here.
+        //                return diagMap;
+        //            }).collect(Collectors.toList());
+        //            sectionData.put("diagnostics", details);
+        //        }
+        //        // Insert this section into the central report using a unique identifier.
+        //        reportData.putSection("diagnostics", sectionData);
     }
 
     @Override

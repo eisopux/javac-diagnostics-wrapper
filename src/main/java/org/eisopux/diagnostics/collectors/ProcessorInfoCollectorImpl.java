@@ -7,6 +7,7 @@ import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.util.Context;
 
 import org.eisopux.diagnostics.core.Collector;
+import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.utility.ProcessorInfo;
 
 import java.lang.reflect.Field;
@@ -47,15 +48,10 @@ public class ProcessorInfoCollectorImpl implements Collector<ProcessorInfo> {
     }
 
     @Override
-    public void onBeforeCompile() {
-        // Clear any old data before a new compile
-        discoveredProcessors.clear();
-    }
+    public void onBeforeCompile(CompilationTaskBuilder builder) {}
 
     @Override
-    public void onAfterCompile(boolean success) {
-        // no-op
-    }
+    public void onAfterCompile() {}
 
     @Override
     public List<ProcessorInfo> getItems() {
