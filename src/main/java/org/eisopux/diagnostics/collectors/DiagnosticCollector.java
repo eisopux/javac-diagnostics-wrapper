@@ -30,37 +30,27 @@ public class DiagnosticCollector implements Collector<Diagnostic<? extends JavaF
 
     @Override
     public void onAfterCompile(CompilationReportData reportData) {
-        // Finalize diagnostics.
         this.finalDiagnostics = diagCollector.getDiagnostics();
 
-        Map<String, Object> sectionData = new HashMap<>();
-        int count = (finalDiagnostics != null ? finalDiagnostics.size() : 0);
-        sectionData.put("diagnosticCount", count);
-
         if (finalDiagnostics != null) {
-            // Build a list of diagnostic details with hard-coded keys.
-            List<Map<String, Object>> details =
-                    finalDiagnostics.stream()
-                            .map(
-                                    diag -> {
-                                        Map<String, Object> diagMap = new HashMap<>();
-                                        diagMap.put("message", diag.getMessage(null));
-                                        diagMap.put("lineNumber", diag.getLineNumber());
-                                        diagMap.put("columnNumber", diag.getColumnNumber());
-                                        diagMap.put("kind", diag.getKind());
-                                        diagMap.put("code", diag.getCode());
-                                        diagMap.put(
-                                                "source",
-                                                diag.getSource() != null
-                                                        ? diag.getSource().toString()
-                                                        : null);
-                                        return diagMap;
-                                    })
-                            .collect(Collectors.toList());
-            sectionData.put("diagnostics", details);
+            List<Map<String, Object>> details = finalDiagnostics.stream().map(diag -> {
+                Map<String, Object> diagMap = new HashMap<>();
+                diagMap.put("source", diag.getSource() != null ? diag.getSource().toUri().toString() : null);
+                diagMap.put("kind", diag.getKind());
+                diagMap.put("position", diag.getPosition());
+                diagMap.put("startPosition", diag.getStartPosition());
+                diagMap.put("endPosition", diag.getEndPosition());
+                diagMap.put("lineNumber", diag.getLineNumber());
+                diagMap.put("columnNumber", diag.getColumnNumber());
+                diagMap.put("code", diag.getCode());
+                diagMap.put("message", diag.getMessage(null));
+                return diagMap;
+            }).collect(Collectors.toList());
+
+            reportData.putSection("diagnostics", details);
         }
-        reportData.putSection("diagnostics", sectionData);
     }
+
 
     @Override
     public List<Diagnostic<? extends JavaFileObject>> getItems() {
