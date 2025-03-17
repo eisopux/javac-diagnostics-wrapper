@@ -1,7 +1,5 @@
 package org.eisopux.diagnostics.core;
 
-import org.eisopux.diagnostics.utility.CompilationReportData;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,7 +30,7 @@ public class CompilerRunner {
 
         boolean success = task.call();
 
-        CompilationReportData reportData = new CompilationReportData();
+        CompilationTaskBuilder.CompilationReportData reportData = new CompilationTaskBuilder.CompilationReportData();
 
         collectors.forEach(c -> c.onAfterCompile(reportData));
 

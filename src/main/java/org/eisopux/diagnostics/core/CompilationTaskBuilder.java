@@ -1,9 +1,7 @@
 package org.eisopux.diagnostics.core;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import javax.lang.model.SourceVersion;
 import javax.tools.*;
@@ -140,6 +138,23 @@ public class CompilationTaskBuilder {
             return String.format(
                     "recognizedOptions = %s; classNames = %s; files = %s; unrecognizedOptions = %s",
                     recognizedOptions, classNames, files, unrecognizedOptions);
+        }
+    }
+
+    public static class CompilationReportData {
+        // The value is now an Object so that it can hold any kind of data structure.
+        private final Map<String, Object> sections = new HashMap<>();
+
+        public void putSection(String sectionId, Object sectionData) {
+            sections.put(sectionId, sectionData);
+        }
+
+        public Object getSection(String sectionId) {
+            return sections.get(sectionId);
+        }
+
+        public Map<String, Object> getAllSections() {
+            return Collections.unmodifiableMap(sections);
         }
     }
 }

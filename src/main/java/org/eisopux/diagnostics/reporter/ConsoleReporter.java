@@ -1,14 +1,14 @@
 package org.eisopux.diagnostics.reporter;
 
+import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.core.Reporter;
-import org.eisopux.diagnostics.utility.CompilationReportData;
 
 import java.util.Map;
 
 public class ConsoleReporter implements Reporter {
 
     @Override
-    public void generateReport(CompilationReportData reportData) {
+    public void generateReport(CompilationTaskBuilder.CompilationReportData reportData) {
         reportData.getAllSections().forEach((sectionName, sectionData) -> {
             System.out.println("Section: " + sectionName);
 

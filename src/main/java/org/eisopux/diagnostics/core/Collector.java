@@ -1,7 +1,5 @@
 package org.eisopux.diagnostics.core;
 
-import org.eisopux.diagnostics.utility.CompilationReportData;
-
 import java.util.List;
 
 public interface Collector<T> {
@@ -16,7 +14,7 @@ public interface Collector<T> {
      * Called after compilation. The collector should finalize its data and contribute its section
      * into the given report.
      */
-    default void onAfterCompile(CompilationReportData reportData) {}
+    default void onAfterCompile(CompilationTaskBuilder.CompilationReportData reportData) {}
 
     List<T> getItems();
 }

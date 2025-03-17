@@ -2,7 +2,6 @@ package org.eisopux.diagnostics.collectors;
 
 import org.eisopux.diagnostics.core.Collector;
 import org.eisopux.diagnostics.core.CompilationTaskBuilder;
-import org.eisopux.diagnostics.utility.CompilationReportData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +28,7 @@ public class DiagnosticCollector implements Collector<Diagnostic<? extends JavaF
     }
 
     @Override
-    public void onAfterCompile(CompilationReportData reportData) {
+    public void onAfterCompile(CompilationTaskBuilder.CompilationReportData reportData) {
         this.finalDiagnostics = diagCollector.getDiagnostics();
 
         if (finalDiagnostics != null) {
