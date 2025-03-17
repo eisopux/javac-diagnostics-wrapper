@@ -2,6 +2,7 @@ package org.eisopux.diagnostics.reporter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.core.Reporter;
 
@@ -14,6 +15,3 @@ public class JSONReporter implements Reporter {
         System.out.println(json);
     }
 }
-
-
-

@@ -2,14 +2,14 @@ package org.eisopux.diagnostics.reporter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
 import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.core.Reporter;
 
 import java.util.*;
-import java.util.stream.Collectors;
-
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class LSPReporter implements Reporter {
 
@@ -30,19 +30,26 @@ public class LSPReporter implements Reporter {
         System.out.println(json);
     }
 
-    private List<Map<String, Object>> generateDiagnosticsReport(List<Map<String, Object>> diagnosticsList) {
-        Map<String, List<Map<String, Object>>> groupedDiagnostics = diagnosticsList.stream()
-                .collect(Collectors.groupingBy(diag -> {
-                    Object fileUriObj = diag.get("source");
-                    return fileUriObj != null ? fileUriObj.toString() : "unknown";
-                }));
+    private List<Map<String, Object>> generateDiagnosticsReport(
+            List<Map<String, Object>> diagnosticsList) {
+        Map<String, List<Map<String, Object>>> groupedDiagnostics =
+                diagnosticsList.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        diag -> {
+                                            Object fileUriObj = diag.get("source");
+                                            return fileUriObj != null
+                                                    ? fileUriObj.toString()
+                                                    : "unknown";
+                                        }));
 
         List<Map<String, Object>> output = new ArrayList<>();
         for (Map.Entry<String, List<Map<String, Object>>> entry : groupedDiagnostics.entrySet()) {
             String fileUri = entry.getKey();
-            List<Map<String, Object>> lspDiagnostics = entry.getValue().stream()
-                    .map(this::transformDiagnosticToLSP)
-                    .collect(Collectors.toList());
+            List<Map<String, Object>> lspDiagnostics =
+                    entry.getValue().stream()
+                            .map(this::transformDiagnosticToLSP)
+                            .collect(Collectors.toList());
 
             Map<String, Object> fileEntry = new LinkedHashMap<>();
             fileEntry.put("uri", fileUri);
@@ -56,9 +63,15 @@ public class LSPReporter implements Reporter {
         Map<String, Object> lspDiag = new LinkedHashMap<>();
 
         // Convert 1-indexed line/column to 0-indexed.
-        int line = diag.get("lineNumber") != null ? ((Number) diag.get("lineNumber")).intValue() - 1 : 0;
-        int column = diag.get("columnNumber") != null ? ((Number) diag.get("columnNumber")).intValue() - 1 : 0;
-        int endColumn = column + 2;  // Assume a fixed width; adjust as needed.
+        int line =
+                diag.get("lineNumber") != null
+                        ? ((Number) diag.get("lineNumber")).intValue() - 1
+                        : 0;
+        int column =
+                diag.get("columnNumber") != null
+                        ? ((Number) diag.get("columnNumber")).intValue() - 1
+                        : 0;
+        int endColumn = column + 2; // Assume a fixed width; adjust as needed.
 
         Map<String, Object> start = new LinkedHashMap<>();
         start.put("line", line);
@@ -88,7 +101,8 @@ public class LSPReporter implements Reporter {
         return lspDiag;
     }
 
-    private static final Pattern PROCESSOR_PATTERN = Pattern.compile("^\\[([^:\\]]+)(?::[^\\]]+)?\\]");
+    private static final Pattern PROCESSOR_PATTERN =
+            Pattern.compile("^\\[([^:\\]]+)(?::[^\\]]+)?\\]");
 
     private String extractProcessorFromMessage(Object messageObj) {
         if (messageObj == null) {
@@ -101,7 +115,6 @@ public class LSPReporter implements Reporter {
         }
         return null;
     }
-
 
     private enum DiagnosticKind {
         ERROR(1),
