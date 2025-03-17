@@ -8,6 +8,9 @@ import org.eisopux.diagnostics.utility.CompilationReportData;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LSPReporter implements Reporter {
 
     @Override
@@ -76,10 +79,29 @@ public class LSPReporter implements Reporter {
         lspDiag.put("message", diag.get("message"));
 
         // Set source to "javac" as a placeholder.
-        lspDiag.put("source", "javac");
+        String processorName = extractProcessorFromMessage(diag.get("message"));
+        if (processorName == null) {
+            processorName = "javac";
+        }
+        lspDiag.put("source", processorName);
 
         return lspDiag;
     }
+
+    private static final Pattern PROCESSOR_PATTERN = Pattern.compile("^\\[([^:\\]]+)(?::[^\\]]+)?\\]");
+
+    private String extractProcessorFromMessage(Object messageObj) {
+        if (messageObj == null) {
+            return null;
+        }
+        String message = messageObj.toString();
+        Matcher matcher = PROCESSOR_PATTERN.matcher(message);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return null;
+    }
+
 
     private enum DiagnosticKind {
         ERROR(1),
