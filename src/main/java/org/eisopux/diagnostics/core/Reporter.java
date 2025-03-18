@@ -4,5 +4,5 @@ package org.eisopux.diagnostics.core;
 public interface Reporter {
 
     /** Produce a formatted report given: */
-    void generateReport(CompilationTaskBuilder.CompilationReportData reportData);
+    void generateReport(CompilationReportData reportData);
 }

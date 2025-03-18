@@ -3,7 +3,7 @@ package org.eisopux.diagnostics.reporter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.eisopux.diagnostics.core.CompilationTaskBuilder;
+import org.eisopux.diagnostics.core.CompilationReportData;
 import org.eisopux.diagnostics.core.Reporter;
 
 import java.util.*;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class LSPReporter implements Reporter {
 
     @Override
-    public void generateReport(CompilationTaskBuilder.CompilationReportData reportData) {
+    public void generateReport(CompilationReportData reportData) {
         Object sectionObj = reportData.getSection("diagnostics");
         if (!(sectionObj instanceof List)) {
             System.out.println("[]");

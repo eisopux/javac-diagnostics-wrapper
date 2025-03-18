@@ -14,7 +14,7 @@ public interface Collector<T> {
      * Called after compilation. The collector should finalize its data and contribute its section
      * into the given report.
      */
-    default void onAfterCompile(CompilationTaskBuilder.CompilationReportData reportData) {}
+    default void onAfterCompile(CompilationReportData reportData) {}
 
     List<T> getItems();
 }

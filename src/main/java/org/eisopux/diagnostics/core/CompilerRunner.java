@@ -30,8 +30,8 @@ public class CompilerRunner {
 
         boolean success = task.call();
 
-        CompilationTaskBuilder.CompilationReportData reportData =
-                new CompilationTaskBuilder.CompilationReportData();
+        CompilationReportData reportData =
+                new CompilationReportData();
 
         collectors.forEach(c -> c.onAfterCompile(reportData));
 

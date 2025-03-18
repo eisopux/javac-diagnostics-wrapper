@@ -1,5 +1,6 @@
 package org.eisopux.diagnostics.reporter;
 
+import org.eisopux.diagnostics.core.CompilationReportData;
 import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.core.Reporter;
 
@@ -8,7 +9,7 @@ import java.util.Map;
 public class ConsoleReporter implements Reporter {
 
     @Override
-    public void generateReport(CompilationTaskBuilder.CompilationReportData reportData) {
+    public void generateReport(CompilationReportData reportData) {
         reportData
                 .getAllSections()
                 .forEach(
