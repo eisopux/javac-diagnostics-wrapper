@@ -6,6 +6,11 @@ import java.util.*;
 import javax.lang.model.SourceVersion;
 import javax.tools.*;
 
+/**
+ * CompilationTaskBuilder is a utility class that encapsulates the creation of a {@link
+ * javax.tools.JavaCompiler.CompilationTask} for a {@link org.eisopux.diagnostics.core.Collector} to
+ * attach to.
+ */
 public class CompilationTaskBuilder {
     private JavaCompiler compiler;
     private StandardJavaFileManager fileManager;
@@ -26,8 +31,17 @@ public class CompilationTaskBuilder {
         this.javaFiles = javaFiles;
     }
 
+    /**
+     * Creates a new CompilationTaskBuilder instance by parsing command-line arguments. This method
+     * retrieves the system Java compiler, obtains its standard file manager, and uses {@link
+     * JavacOptions#parse(OptionChecker, OptionChecker, String...)} to separate the arguments into
+     * recognized options, class names, and source file paths.
+     *
+     * @param args the command-line arguments to be parsed and used for the compilation task
+     * @return a configured CompilationTaskBuilder ready to build a CompilationTask
+     * @throws IllegalStateException if no system Java compiler is found
+     */
     public static CompilationTaskBuilder fromArgs(String[] args) {
-        // 1. Get the system compiler and file manager.
         JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             throw new IllegalStateException(
@@ -35,7 +49,6 @@ public class CompilationTaskBuilder {
         }
         StandardJavaFileManager fileManager = compiler.getStandardFileManager(null, null, null);
 
-        // 2. Parse arguments.
         JavacOptions options = JavacOptions.parse(compiler, fileManager, args);
         if (!options.getUnrecognizedOptions().isEmpty()) {
             System.err.println("Invalid options: " + options);
@@ -48,10 +61,21 @@ public class CompilationTaskBuilder {
         return new CompilationTaskBuilder(compiler, fileManager, options, null, javaFiles);
     }
 
+    /**
+     * Attaches a diagnostic listener to this builder. The listener will be used during compilation
+     * to capture diagnostic messages.
+     *
+     * @param listener a DiagnosticCollector for JavaFileObjects
+     */
     public void addDiagnosticListener(DiagnosticCollector<JavaFileObject> listener) {
         this.diagnosticListener = listener;
     }
 
+    /**
+     * Builds a fully configured {@link javax.tools.JavaCompiler.CompilationTask}
+     *
+     * @return a CompilationTask ready to be executed
+     */
     public JavaCompiler.CompilationTask build() {
         return compiler.getTask(
                 null,
@@ -62,6 +86,7 @@ public class CompilationTaskBuilder {
                 javaFiles);
     }
 
+    /** JavacOptions encapsulates the parsing of command-line arguments for the Java compiler. */
     private static final class JavacOptions {
         private final List<String> recognizedOptions;
         private final List<String> classNames;

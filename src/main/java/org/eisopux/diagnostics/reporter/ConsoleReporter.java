@@ -1,11 +1,12 @@
 package org.eisopux.diagnostics.reporter;
 
 import org.eisopux.diagnostics.core.CompilationReportData;
-import org.eisopux.diagnostics.core.CompilationTaskBuilder;
 import org.eisopux.diagnostics.core.Reporter;
 
-import java.util.Map;
-
+/**
+ * ConsoleReporter is an implementation of {@link org.eisopux.diagnostics.core.Reporter} that
+ * outputs unformatted report data to the console.
+ */
 public class ConsoleReporter implements Reporter {
 
     @Override
@@ -15,22 +16,8 @@ public class ConsoleReporter implements Reporter {
                 .forEach(
                         (sectionName, sectionData) -> {
                             System.out.println("Section: " + sectionName);
-
-                            if (sectionData instanceof Map) {
-                                ((Map<?, ?>) sectionData)
-                                        .forEach(
-                                                (key, value) ->
-                                                        System.out.println(
-                                                                "  " + key + ": " + value));
-                            } else if (sectionData instanceof Iterable) {
-                                for (Object element : (Iterable<?>) sectionData) {
-                                    System.out.println("  " + element);
-                                }
-                            } else {
-                                System.out.println("  " + sectionData);
-                            }
-
-                            System.out.println();
+                            System.out.println(sectionData);
+                            System.out.println(); // Blank line between sections.
                         });
     }
 }

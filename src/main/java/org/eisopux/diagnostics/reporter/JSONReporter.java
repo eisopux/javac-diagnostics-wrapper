@@ -6,6 +6,11 @@ import com.google.gson.GsonBuilder;
 import org.eisopux.diagnostics.core.CompilationReportData;
 import org.eisopux.diagnostics.core.Reporter;
 
+/**
+ * JSONReporter is an implementation of {@link org.eisopux.diagnostics.core.Reporter} that
+ * faithfully outputs each {@link org.eisopux.diagnostics.core.CompilationReportData} section as
+ * JSON.
+ */
 public class JSONReporter implements Reporter {
 
     @Override
