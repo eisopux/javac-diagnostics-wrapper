@@ -4,8 +4,8 @@ import io.github.eisopux.diagnostics.core.CompilationReportData;
 import io.github.eisopux.diagnostics.core.Reporter;
 
 /**
- * ConsoleReporter is an implementation of {@link Reporter} that
- * outputs unformatted report data to the console.
+ * ConsoleReporter is an implementation of {@link Reporter} that outputs unformatted report data to
+ * the console.
  */
 public class ConsoleReporter implements Reporter {
 

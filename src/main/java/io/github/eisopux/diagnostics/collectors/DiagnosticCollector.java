@@ -1,9 +1,5 @@
 package io.github.eisopux.diagnostics.collectors;
 
-import io.github.eisopux.diagnostics.core.Collector;
-import io.github.eisopux.diagnostics.core.CompilationReportData;
-import io.github.eisopux.diagnostics.core.CompilationTaskBuilder;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +7,10 @@ import java.util.stream.Collectors;
 
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+
+import io.github.eisopux.diagnostics.core.Collector;
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.CompilationTaskBuilder;
 
 /**
  * A concrete implementation of {@link Collector} that wraps a {@link

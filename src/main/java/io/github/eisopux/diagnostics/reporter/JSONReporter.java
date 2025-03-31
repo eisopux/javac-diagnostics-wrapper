@@ -7,9 +7,8 @@ import io.github.eisopux.diagnostics.core.CompilationReportData;
 import io.github.eisopux.diagnostics.core.Reporter;
 
 /**
- * JSONReporter is an implementation of {@link Reporter} that
- * faithfully outputs each {@link CompilationReportData} section as
- * JSON.
+ * JSONReporter is an implementation of {@link Reporter} that faithfully outputs each {@link
+ * CompilationReportData} section as JSON.
  */
 public class JSONReporter implements Reporter {
 

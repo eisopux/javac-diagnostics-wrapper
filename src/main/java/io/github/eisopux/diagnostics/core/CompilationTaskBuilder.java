@@ -8,8 +8,7 @@ import javax.tools.*;
 
 /**
  * CompilationTaskBuilder is a utility class that encapsulates the creation of a {@link
- * javax.tools.JavaCompiler.CompilationTask} for a {@link Collector} to
- * attach to.
+ * javax.tools.JavaCompiler.CompilationTask} for a {@link Collector} to attach to.
  */
 public class CompilationTaskBuilder {
     private final JavaCompiler compiler;

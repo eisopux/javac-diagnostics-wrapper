@@ -3,9 +3,6 @@ package io.github.eisopux.diagnostics.reporter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import io.github.eisopux.diagnostics.core.CompilationReportData;
-import io.github.eisopux.diagnostics.core.Reporter;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,10 +12,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.Reporter;
+
 /**
- * LSPReporter is a {@link Reporter} implementation that transforms
- * aggregated compilation report data into a JSON output format compliant with the Language Server
- * Protocol (LSP) diagnostic standard.
+ * LSPReporter is a {@link Reporter} implementation that transforms aggregated compilation report
+ * data into a JSON output format compliant with the Language Server Protocol (LSP) diagnostic
+ * standard.
  *
  * <p>To extend this reporter to support additional sections from other collectors, add
  * corresponding cases to the switch statement in {@link #generateReport(CompilationReportData)}.

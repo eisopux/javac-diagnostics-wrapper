@@ -7,8 +7,8 @@ import javax.tools.*;
 
 /**
  * CompilerRunner sets up and executes a Java compilation task using the system Java compiler, while
- * integrating custom data {@link Collector}(s) and a {@link
- * Reporter} to process and format the collected output.
+ * integrating custom data {@link Collector}(s) and a {@link Reporter} to process and format the
+ * collected output.
  */
 public class CompilerRunner {
 
