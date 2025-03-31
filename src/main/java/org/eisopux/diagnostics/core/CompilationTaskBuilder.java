@@ -12,11 +12,11 @@ import javax.tools.*;
  * attach to.
  */
 public class CompilationTaskBuilder {
-    private JavaCompiler compiler;
-    private StandardJavaFileManager fileManager;
-    private JavacOptions options;
+    private final JavaCompiler compiler;
+    private final StandardJavaFileManager fileManager;
+    private final JavacOptions options;
     private javax.tools.DiagnosticCollector<JavaFileObject> diagnosticListener;
-    private Iterable<? extends JavaFileObject> javaFiles;
+    private final Iterable<? extends JavaFileObject> javaFiles;
 
     private CompilationTaskBuilder(
             JavaCompiler compiler,
