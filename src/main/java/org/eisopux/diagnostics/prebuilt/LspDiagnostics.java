@@ -5,7 +5,7 @@ import org.eisopux.diagnostics.core.CompilerRunner;
 import org.eisopux.diagnostics.reporter.LSPReporter;
 
 /** A prebuilt LSP diagnostics output to call from the command line */
-public class LSPDiagnostics {
+public class LspDiagnostics {
     public static void main(String[] args) {
         CompilerRunner runner =
                 new CompilerRunner()
