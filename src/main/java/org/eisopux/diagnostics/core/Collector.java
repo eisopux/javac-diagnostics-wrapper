@@ -16,7 +16,7 @@ public interface Collector {
      *
      * @param builder the CompilationTaskBuilder used to create the compilation task
      */
-    default void onBeforeCompile(CompilationTaskBuilder builder) {}
+    void onBeforeCompile(CompilationTaskBuilder builder);
 
     /**
      * Called after compilation. The Collector should finalize its data and populate its section in
@@ -25,5 +25,5 @@ public interface Collector {
      * @param reportData the CompilationReportData object into which the Collector should insert its
      *     data
      */
-    default void onAfterCompile(CompilationReportData reportData) {}
+    void onAfterCompile(CompilationReportData reportData);
 }
