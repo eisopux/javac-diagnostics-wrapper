@@ -3,6 +3,8 @@
 A customizable wrapper around javac that aggregates and outputs compiler diagnostics in a desired
 format using a pluggable architecture.
 
+The `javac diagnostics wrapper` is part of the larger https://eisopux.github.io/ project.
+
 ## How to Build
 
 ```shell
@@ -28,14 +30,14 @@ use
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    org.eisopux.diagnostics.prebuilt.JSONDiagnostics \
+    io.github.eisopux.diagnostics.builtin.JsonDiagnostics \
     [flags] File1.java File2.java
 ```
 (where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
-There are currently two prebuilt outputs using a Diagnostics Collector:
-- `org.eisopux.diagnostics.prebuilt.LSPDiagnostics` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
-- `org.eisopux.diagnostics.prebuilt.JSONDiagnostics` produces output in a JSON format
+There are currently two builtin outputs using a Diagnostics Collector:
+- `.io.github.eisopux.diagnostics.builtin.LspDiagnostics` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
+- `io.github.eisopux.diagnostics.builtin.JsonDiagnostics` produces output in a JSON format
    directly corresponding to the javac diagnostics.
 
 
@@ -46,7 +48,7 @@ Normal compilation of a file with errors, using the javac format:
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    org.eisopux.diagnostics.prebuilt.JSONDiagnostics \
+    io.github.eisopux.diagnostics.builtin.JsonDiagnostics \
     File1.java
 ```
 
@@ -87,7 +89,7 @@ using the LSP format:
 ```shell
 java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
-    org.eisopux.diagnostics.prebuilt.LSPDiagnostics \
+    io.github.eisopux.diagnostics.builtin.LspDiagnostics \
     -classpath /path/to/checker-framework/checker/dist/checker.jar \
     -processor org.checkerframework.checker.nullness.NullnessChecker \
     -AshowPrefixInWarningMessages
@@ -121,7 +123,7 @@ results in:
   }
 ]
 ```
-Note that the `-AshowPrefixInWarningMessages` is optional Checker Framework flag
+Note that the `-AshowPrefixInWarningMessages` is an optional Checker Framework flag
 and will attach correct processor information to formats that support this information.
 
 ## How to Develop
@@ -131,8 +133,8 @@ To format the source code, run `./gradlew spotlessApply`.
 ### Architecture Overview
 
 The **javac Diagnostics Wrapper** features a modular, pluggable design that 
-decouples data collection from output formatting. It utilizes a collector-reporter interface 
- that allows developers to easily implement custom diagnostic gathering and presentation
+decouples data collection from output formatting. It utilizes a collector-reporter interface
+that allows developers to easily implement custom diagnostic gathering and presentation
 formats.
 
 
@@ -153,25 +155,27 @@ formatting the data according to its output standard.
 
 #### Implement the Collector Interface
 
-Create a new class that implements `org.eisopux.diagnostics.core.Collector`. Override:
+Create a new class that implements `io.github.eisopux.diagnostics.core.Collector`. Override:
 - `onBeforeCompile(CompilationTaskBuilder builder)` if you need to attach listeners or initialize data structures.
 - `onAfterCompile(CompilationReportData reportData)` to finalize your data and populate a report section as a list of key/value pairs.
 
 
 #### Implement the Reporter Interface
 
-Create a new class that implements `org.eisopux.diagnostics.core.Reporter` and its 
+Create a new class that implements `io.github.eisopux.diagnostics.core.Reporter` and its 
 `generateReport(CompilationReportData reportData)` method. Format the data according 
 to your output requirements.
 
-#### Create a Prebuilt Output
+#### Create An Output Configuration
 
-Create a prebuilt class in the `org.eisopux.diagnostics.core.prebuilt`
-package to generate an output. An example of such a class
-is as follows:
+The `javac-diagnositc-wrapper` produces output by combining one or more `Collectors` with exactly one
+`Reporter`. To create an easy-to-use output configuration, add a new 
+class to the`io.github.eisopux.diagnostics.builtin` package. This class will encapsulate 
+the desired collectors and reporter, providing a convenient entry
+point for generating an output. An example implementation is shown below:
 
 ```java
-public class JSONDiagnostics {
+public class JsonDiagnostics {
     public static void main(String[] args) {
         CompilerRunner runner =
                 new CompilerRunner()
@@ -183,9 +187,9 @@ public class JSONDiagnostics {
 }
 ```
 
-Where `.addCollector` may be chained an arbirary amount of times to combine
-multiple collectors and `.setReporter` may be called once to select the desired 
-output format.
+Where `.addCollector` should be called one or more times to combine
+multiple collectors and `.setReporter` should be called exactly once to select 
+the desired output format.
 
 ## Roadmap
 
