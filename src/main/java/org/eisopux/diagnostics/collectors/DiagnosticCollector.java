@@ -21,8 +21,6 @@ public class DiagnosticCollector implements Collector {
     private final javax.tools.DiagnosticCollector<JavaFileObject> diagCollector =
             new javax.tools.DiagnosticCollector<>();
 
-    private List<Diagnostic<? extends JavaFileObject>> finalDiagnostics;
-
     @Override
     public void onBeforeCompile(CompilationTaskBuilder builder) {
         builder.addDiagnosticListener(diagCollector);
@@ -30,7 +28,9 @@ public class DiagnosticCollector implements Collector {
 
     @Override
     public void onAfterCompile(CompilationReportData reportData) {
-        this.finalDiagnostics = diagCollector.getDiagnostics();
+        List<Diagnostic<? extends JavaFileObject>> finalDiagnostics =
+                diagCollector.getDiagnostics();
+
         List<Map<String, Object>> details =
                 finalDiagnostics.stream()
                         .map(
