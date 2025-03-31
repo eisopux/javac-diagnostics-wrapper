@@ -9,6 +9,7 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.6'
     id 'com.diffplug.spotless' version '7.0.2'
     id 'net.ltgt.errorprone' version '4.1.0'
+    id 'eclipse'
 }
 
 repositories {
@@ -51,5 +52,19 @@ spotless {
         greclipse()  // which formatter Spotless should use to format .gradle files.
         indentWithSpaces(4)
         trimTrailingWhitespace()
+    }
+}
+
+eclipse.classpath {
+    defaultOutputDir = file("build/default")
+    file.whenMerged { cp ->
+        cp.entries.forEach { cpe ->
+            if (cpe instanceof org.gradle.plugins.ide.eclipse.model.SourceFolder) {
+                cpe.output = cpe.output.replace "bin/", "build/classes/java/"
+            }
+            if (cpe instanceof org.gradle.plugins.ide.eclipse.model.Output) {
+                cpe.path = cpe.path.replace "bin/", "build/"
+            }
+        }
     }
 }
