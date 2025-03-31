@@ -1,10 +1,10 @@
-package org.eisopux.diagnostics.reporter;
+package io.github.eisopux.diagnostics.reporter;
 
-import org.eisopux.diagnostics.core.CompilationReportData;
-import org.eisopux.diagnostics.core.Reporter;
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.Reporter;
 
 /**
- * ConsoleReporter is an implementation of {@link org.eisopux.diagnostics.core.Reporter} that
+ * ConsoleReporter is an implementation of {@link Reporter} that
  * outputs unformatted report data to the console.
  */
 public class ConsoleReporter implements Reporter {

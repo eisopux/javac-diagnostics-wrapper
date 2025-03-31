@@ -1,4 +1,4 @@
-package org.eisopux.diagnostics.core;
+package io.github.eisopux.diagnostics.core;
 
 /**
  * A Collector is responsible for gathering diagnostic or other compiler-related data during a

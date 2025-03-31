@@ -1,4 +1,4 @@
-package org.eisopux.diagnostics.core;
+package io.github.eisopux.diagnostics.core;
 
 import java.util.Collections;
 import java.util.HashMap;

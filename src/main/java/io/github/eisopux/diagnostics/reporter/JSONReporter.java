@@ -1,14 +1,14 @@
-package org.eisopux.diagnostics.reporter;
+package io.github.eisopux.diagnostics.reporter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.eisopux.diagnostics.core.CompilationReportData;
-import org.eisopux.diagnostics.core.Reporter;
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.Reporter;
 
 /**
- * JSONReporter is an implementation of {@link org.eisopux.diagnostics.core.Reporter} that
- * faithfully outputs each {@link org.eisopux.diagnostics.core.CompilationReportData} section as
+ * JSONReporter is an implementation of {@link Reporter} that
+ * faithfully outputs each {@link CompilationReportData} section as
  * JSON.
  */
 public class JSONReporter implements Reporter {

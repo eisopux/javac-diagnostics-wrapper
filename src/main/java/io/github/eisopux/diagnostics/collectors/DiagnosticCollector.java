@@ -1,8 +1,8 @@
-package org.eisopux.diagnostics.collectors;
+package io.github.eisopux.diagnostics.collectors;
 
-import org.eisopux.diagnostics.core.Collector;
-import org.eisopux.diagnostics.core.CompilationReportData;
-import org.eisopux.diagnostics.core.CompilationTaskBuilder;
+import io.github.eisopux.diagnostics.core.Collector;
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.CompilationTaskBuilder;
 
 import java.util.HashMap;
 import java.util.List;

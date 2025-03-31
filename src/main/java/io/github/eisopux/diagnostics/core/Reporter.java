@@ -1,4 +1,4 @@
-package org.eisopux.diagnostics.core;
+package io.github.eisopux.diagnostics.core;
 
 /** A pluggable interface for generating output from collected data. */
 public interface Reporter {

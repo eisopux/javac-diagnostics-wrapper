@@ -1,10 +1,10 @@
-package org.eisopux.diagnostics.reporter;
+package io.github.eisopux.diagnostics.reporter;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import org.eisopux.diagnostics.core.CompilationReportData;
-import org.eisopux.diagnostics.core.Reporter;
+import io.github.eisopux.diagnostics.core.CompilationReportData;
+import io.github.eisopux.diagnostics.core.Reporter;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * LSPReporter is a {@link org.eisopux.diagnostics.core.Reporter} implementation that transforms
+ * LSPReporter is a {@link Reporter} implementation that transforms
  * aggregated compilation report data into a JSON output format compliant with the Language Server
  * Protocol (LSP) diagnostic standard.
  *

@@ -1,4 +1,4 @@
-package org.eisopux.diagnostics.core;
+package io.github.eisopux.diagnostics.core;
 
 import java.io.File;
 import java.util.*;
@@ -8,7 +8,7 @@ import javax.tools.*;
 
 /**
  * CompilationTaskBuilder is a utility class that encapsulates the creation of a {@link
- * javax.tools.JavaCompiler.CompilationTask} for a {@link org.eisopux.diagnostics.core.Collector} to
+ * javax.tools.JavaCompiler.CompilationTask} for a {@link Collector} to
  * attach to.
  */
 public class CompilationTaskBuilder {

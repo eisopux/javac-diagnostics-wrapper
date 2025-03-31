@@ -1,8 +1,8 @@
-package org.eisopux.diagnostics.prebuilt;
+package io.github.eisopux.diagnostics.builtin;
 
-import org.eisopux.diagnostics.collectors.DiagnosticCollector;
-import org.eisopux.diagnostics.core.CompilerRunner;
-import org.eisopux.diagnostics.reporter.LSPReporter;
+import io.github.eisopux.diagnostics.collectors.DiagnosticCollector;
+import io.github.eisopux.diagnostics.core.CompilerRunner;
+import io.github.eisopux.diagnostics.reporter.LSPReporter;
 
 /** A prebuilt LSP diagnostics output to call from the command line */
 public class LspDiagnostics {
