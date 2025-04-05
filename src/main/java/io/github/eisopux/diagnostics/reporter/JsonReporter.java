@@ -10,7 +10,7 @@ import io.github.eisopux.diagnostics.core.Reporter;
  * JSONReporter is an implementation of {@link Reporter} that faithfully outputs each {@link
  * CompilationReportData} section as JSON.
  */
-public class JSONReporter implements Reporter {
+public class JsonReporter implements Reporter {
 
     @Override
     public void generateReport(CompilationReportData reportData) {

@@ -30,7 +30,7 @@ import io.github.eisopux.diagnostics.core.Reporter;
  * href="https://microsoft.github.io/language-server-protocol/specifications/specification-current/">
  * Language Server Protocol Specification</a>.
  */
-public class LSPReporter implements Reporter {
+public class LspReporter implements Reporter {
 
     private static final Pattern PROCESSOR_PATTERN =
             Pattern.compile("^\\[([^:\\]]+)(?::[^\\]]+)?\\]");
