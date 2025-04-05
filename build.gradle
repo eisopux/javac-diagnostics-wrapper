@@ -27,7 +27,7 @@ dependencies {
 
 application {
     // Define the main class for the application
-    mainClass = 'org.eisopux.diagnostics.prebuilt.JSONDiagnostics'
+    mainClass = 'org.eisopux.diagnostics.prebuilt.JsonDiagnostics'
 }
 
 tasks.withType(JavaCompile) { compilationTask ->
