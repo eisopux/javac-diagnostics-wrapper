@@ -36,7 +36,7 @@ java \
 (where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
 There are currently two builtin outputs using a Diagnostics Collector:
-- `.io.github.eisopux.diagnostics.builtin.LspDiagnostics` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
+- `io.github.eisopux.diagnostics.builtin.LspDiagnostics` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
 - `io.github.eisopux.diagnostics.builtin.JsonDiagnostics` produces output in a JSON format
    directly corresponding to the javac diagnostics.
 
@@ -190,15 +190,6 @@ public class JsonDiagnostics {
 Where `.addCollector` should be called one or more times to combine
 multiple collectors and `.setReporter` should be called exactly once to select 
 the desired output format.
-
-## Roadmap
-
-- [ ] SARIF Output
-- [ ] Build tool integration
-- [ ] Improved CLI interface
-- [ ] Performance Collector
-- [ ] Support processor information outside of Checker Framework package
-
 
 ## Acknowledgements
 

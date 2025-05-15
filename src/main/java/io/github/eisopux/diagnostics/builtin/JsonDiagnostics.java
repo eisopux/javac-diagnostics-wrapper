@@ -4,7 +4,7 @@ import io.github.eisopux.diagnostics.collectors.DiagnosticCollector;
 import io.github.eisopux.diagnostics.core.CompilerRunner;
 import io.github.eisopux.diagnostics.reporter.JsonReporter;
 
-/** A prebuilt JSON diagnostics output to call from the command line */
+/** A prebuilt JSON diagnostics output to call from the command line. */
 public class JsonDiagnostics {
     public static void main(String[] args) {
         CompilerRunner runner =

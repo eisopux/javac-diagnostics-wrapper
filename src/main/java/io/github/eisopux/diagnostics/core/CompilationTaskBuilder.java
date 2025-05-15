@@ -71,7 +71,7 @@ public class CompilationTaskBuilder {
     }
 
     /**
-     * Builds a fully configured {@link javax.tools.JavaCompiler.CompilationTask}
+     * Builds a fully configured {@link javax.tools.JavaCompiler.CompilationTask}.
      *
      * @return a CompilationTask ready to be executed
      */
