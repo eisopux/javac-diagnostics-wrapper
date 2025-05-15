@@ -61,13 +61,16 @@ public class CompilationTaskBuilder {
     }
 
     /**
-     * Attaches a diagnostic listener to this builder. The listener will be used during compilation
-     * to capture diagnostic messages.
+     * Returns this builder’s diagnostic collector.
+     * If none exists yet, the method lazily creates one and reuses it on subsequent calls.
      *
-     * @param listener a DiagnosticCollector for JavaFileObjects
+     * @return the diagnostic collector instance
      */
-    public void addDiagnosticListener(DiagnosticCollector<JavaFileObject> listener) {
-        this.diagnosticListener = listener;
+    public DiagnosticCollector<JavaFileObject> getOrCreateDiagnosticListener() {
+        if (this.diagnosticListener == null) {
+            this.diagnosticListener = new DiagnosticCollector<>();
+        }
+        return this.diagnosticListener;
     }
 
     /**

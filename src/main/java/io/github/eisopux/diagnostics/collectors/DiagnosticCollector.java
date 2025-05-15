@@ -18,12 +18,11 @@ import io.github.eisopux.diagnostics.core.CompilationTaskBuilder;
  */
 public class DiagnosticCollector implements Collector {
 
-    private final javax.tools.DiagnosticCollector<JavaFileObject> diagCollector =
-            new javax.tools.DiagnosticCollector<>();
+    private javax.tools.DiagnosticCollector<JavaFileObject> diagCollector;
 
     @Override
     public void onBeforeCompile(CompilationTaskBuilder builder) {
-        builder.addDiagnosticListener(diagCollector);
+        diagCollector = builder.getOrCreateDiagnosticListener();
     }
 
     @Override
