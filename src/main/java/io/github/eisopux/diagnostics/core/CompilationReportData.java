@@ -18,15 +18,13 @@ public class CompilationReportData {
      * Maps section identifiers to the data belonging to that section.
      *
      * <ul>
-     *   <li><strong>Key</strong> – a human-readable string that uniquely names the section
-     *       (for example {@code "diagnostics"})
-     *
+     *   <li><strong>Key</strong> – a human-readable string that uniquely names the section (for
+     *       example {@code "diagnostics"})
      *   <li><strong>Value</strong> – a list whose elements are {@code Map<String, Object>}
-     *       instances.  Each inner map represents one logical record (row) of data for
-     *       the section. Keys within this inner map are descriptors and the
-     *       corresponding values are data points (for example, a {@code "diagnostics"} section
-     *       may have key {@code "kind"} with value {@code "ERROR"} or key {@code "line"}
-     *       with value {@code 42})</li>
+     *       instances. Each inner map represents one logical record (row) of data for the section.
+     *       Keys within this inner map are descriptors and the corresponding values are data points
+     *       (for example, a {@code "diagnostics"} section may have key {@code "kind"} with value
+     *       {@code "ERROR"} or key {@code "line"} with value {@code 42})
      * </ul>
      */
     private final Map<String, List<Map<String, Object>>> sections = new HashMap<>();

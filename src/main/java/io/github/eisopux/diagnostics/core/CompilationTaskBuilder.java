@@ -61,8 +61,8 @@ public class CompilationTaskBuilder {
     }
 
     /**
-     * Returns this builder’s diagnostic collector.
-     * If none exists yet, the method lazily creates one and reuses it on subsequent calls.
+     * Returns this builder’s diagnostic collector. If none exists yet, the method lazily creates
+     * one and reuses it on subsequent calls.
      *
      * @return the diagnostic collector instance
      */
