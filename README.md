@@ -132,7 +132,7 @@ To format the source code, run `./gradlew spotlessApply`.
 
 ### Architecture Overview
 
-The **javac Diagnostics Wrapper** features a modular, pluggable design that 
+The **javac diagnostics wrapper** features a modular, pluggable design that 
 decouples data collection from output formatting. It utilizes a collector-reporter interface
 that allows developers to easily implement custom diagnostic gathering and presentation
 formats.
