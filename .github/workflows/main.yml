@@ -25,11 +25,20 @@ jobs:
       - name: Push Checkout
         uses: actions/checkout@v4
         if: github.head_ref == ''
+      - name: Set up JDK 21 for Gradle
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: ${{matrix.jdk}}
+      - name: Use JDK 21 for Gradle
+        run: mkdir -p ~/.gradle && echo "org.gradle.java.home=$JAVA_HOME_21_X64" >> ~/.gradle/gradle.properties
+      - name: Version information
+        run: java -version && ./gradlew -version
       - name: Github Environment Setup
         run: |
           owner=${{ github.repository_owner }}
