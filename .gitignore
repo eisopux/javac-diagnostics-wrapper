@@ -4,6 +4,6 @@
 # Ignore Gradle build output directory
 build
 
-#IDE outputs
+# IDE outputs
 .vscode
 .idea
