@@ -64,7 +64,11 @@ public class CompilerRunner {
 
         collectors.forEach(c -> c.onAfterCompile(reportData));
 
-        if (success) {}
+        if (success) {
+	    // Placeholder for future use. Bool `success` is true iff compilation
+	    // completes without any errors. Add logic here if a specific Collector
+	    // or other feature requires a successful compilation.
+	}
         reporter.generateReport(reportData);
     }
 }
