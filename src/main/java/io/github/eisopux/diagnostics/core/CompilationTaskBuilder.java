@@ -106,7 +106,7 @@ public class CompilationTaskBuilder {
             this.unrecognizedOptions = unrecognizedOptions;
         }
 
-        public static JavacOptions parse(
+        /*class-private*/ static JavacOptions parse(
                 OptionChecker primary, OptionChecker secondary, String... arguments) {
 
             List<String> recognizedOptions = new ArrayList<>();
@@ -144,19 +144,19 @@ public class CompilationTaskBuilder {
             return new JavacOptions(recognizedOptions, classNames, files, unrecognizedOptions);
         }
 
-        public List<String> getRecognizedOptions() {
+        /*class-private*/ List<String> getRecognizedOptions() {
             return Collections.unmodifiableList(recognizedOptions);
         }
 
-        public List<File> getFiles() {
+        /*class-private*/ List<File> getFiles() {
             return Collections.unmodifiableList(files);
         }
 
-        public List<String> getClassNames() {
+        /*class-private*/ List<String> getClassNames() {
             return Collections.unmodifiableList(classNames);
         }
 
-        public List<String> getUnrecognizedOptions() {
+        /*class-private*/ List<String> getUnrecognizedOptions() {
             return Collections.unmodifiableList(unrecognizedOptions);
         }
 
