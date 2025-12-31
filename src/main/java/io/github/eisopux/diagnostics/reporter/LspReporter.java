@@ -162,11 +162,11 @@ public class LspReporter implements Reporter {
 
         private final int lspSeverity;
 
-        /*class-private*/ DiagnosticKind(int severity) {
+        private DiagnosticKind(int severity) {
             this.lspSeverity = severity;
         }
 
-        /*class-private*/ static int fromString(String kindStr) {
+        static int fromString(String kindStr) {
             if (kindStr == null) {
                 return INFORMATION.lspSeverity;
             }
