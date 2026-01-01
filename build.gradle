@@ -19,8 +19,8 @@ repositories {
 dependencies {
     implementation 'com.google.code.gson:gson:2.13.2'
     testImplementation 'junit:junit:4.13.2'
-    if (JavaVersion.current() >= JavaVersion.VERSION_17) {
-        errorprone('com.google.errorprone:error_prone_core:2.41.0')
+    if (JavaVersion.current() >= JavaVersion.VERSION_21) {
+        errorprone('com.google.errorprone:error_prone_core:2.45.0')
         errorproneJavac('com.google.errorprone:javac:9+181-r4173-1')
     }
 }
