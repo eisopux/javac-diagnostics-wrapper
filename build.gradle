@@ -86,13 +86,13 @@ check.dependsOn smokeTest
 // configuration above; the packaged application itself has no Checker Framework dependency. See
 // demo/checker-framework/README.md for the full explanation and how to run this by hand.
 tasks.register('checkerFrameworkDemo', JavaExec) {
-    description = 'Runs the Nullness Checker on the demo file through SarifDiagnostics and checks the SARIF output.'
+    description = 'Runs the Nullness Checker on the demo files through SarifDiagnostics and checks the SARIF output.'
     group = 'verification'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'io.github.eisopux.diagnostics.builtin.SarifDiagnostics'
     workingDir = rootDir
-    // Demo.java has an intentional Nullness Checker violation, so SarifDiagnostics is expected to
-    // exit 1; that is not this task's failure.
+    // Demo.java and OtherError.java each have an intentional error, so SarifDiagnostics is
+    // expected to exit 1; that is not this task's failure.
     ignoreExitValue = true
     // The Checker Framework reaches into javac internals not exported by default on JDK 16+.
     jvmArgs = [
@@ -111,7 +111,8 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
         configurations.checkerFrameworkDemo.asPath,
         '-processor',
         'org.checkerframework.checker.nullness.NullnessChecker',
-        'demo/checker-framework/Demo.java'
+        'demo/checker-framework/Demo.java',
+        'demo/checker-framework/OtherError.java'
     ]
 
     def outputFile = file("${buildDir}/demo/checker-framework-nullness.sarif.json")
@@ -121,10 +122,17 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
     }
     doLast {
         String sarif = outputFile.text
-        if (!sarif.contains('"ruleId": "dereference.of.nullable"')) {
-            throw new GradleException(
-            "Expected a dereference.of.nullable SARIF result from the Nullness Checker; " +
-            "got:\n${sarif}")
+        // One finding from the Checker Framework (its own message key as ruleId) and one plain
+        // javac diagnostic (its raw code as ruleId) -- see OtherError.java's Javadoc for why.
+        List<String> expectedRuleIds = [
+            'dereference.of.nullable',
+            'compiler.err.prob.found.req'
+        ]
+        List<String> missing = expectedRuleIds.findAll {
+            !sarif.contains("\"ruleId\": \"${it}\"")
+        }
+        if (!missing.isEmpty()) {
+            throw new GradleException("Expected SARIF results with ruleId ${missing}; got:\n${sarif}")
         }
         logger.lifecycle("Wrote SARIF demo output to ${outputFile}")
     }

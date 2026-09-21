@@ -21,15 +21,19 @@ java \
     io.github.eisopux.diagnostics.builtin.SarifDiagnostics \
     -classpath /path/to/checker-framework/checker/dist/checker.jar \
     -processor org.checkerframework.checker.nullness.NullnessChecker \
-    Demo.java
+    Demo.java OtherError.java
 ```
 
 (`checker/dist/checker.jar` is the Checker Framework's all-in-one jar; the `io.github.eisop:checker`
 Maven artifact used by the `checkerFrameworkDemo` Gradle task below works the same way.)
 
-`Demo.java` has one intentional bug: `myObject` is only assigned a non-null value conditionally,
-so the Nullness Checker flags the unconditional `myObject.toString()`. Running the command above
-under a JDK version the Checker Framework lists as tested (8, 11, 17, or 21) produces:
+Two intentionally-flawed files, on purpose: `Demo.java`'s `myObject` is only assigned a non-null
+value conditionally, so the Nullness Checker flags the unconditional `myObject.toString()`, and
+`OtherError.java` has a plain type mismatch that is a genuine javac error, unrelated to the
+Checker Framework. (They have to be separate files: a plain attribution error in a class stops the
+Checker Framework from analyzing that same class, which would silently lose the Nullness Checker
+finding if both bugs were in one file.) Running the command above under a JDK version the Checker
+Framework lists as tested (8, 11, 17, or 21) produces:
 
 ```json
 {
@@ -40,7 +44,8 @@ under a JDK version the Checker Framework lists as tested (8, 11, 17, or 21) pro
         "driver": {
           "name": "javac",
           "rules": [
-            { "id": "dereference.of.nullable" }
+            { "id": "dereference.of.nullable" },
+            { "id": "compiler.err.prob.found.req" }
           ]
         }
       },
@@ -58,10 +63,32 @@ under a JDK version the Checker Framework lists as tested (8, 11, 17, or 21) pro
                   "uri": "file:///.../demo/checker-framework/Demo.java"
                 },
                 "region": {
-                  "startLine": 13,
+                  "startLine": 16,
                   "startColumn": 28,
-                  "charOffset": 475,
+                  "charOffset": 721,
                   "charLength": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "compiler.err.prob.found.req",
+          "level": "error",
+          "message": {
+            "text": "incompatible types: java.lang.String cannot be converted to int"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///.../demo/checker-framework/OtherError.java"
+                },
+                "region": {
+                  "startLine": 16,
+                  "startColumn": 25,
+                  "charOffset": 898,
+                  "charLength": 14
                 }
               }
             }
@@ -76,13 +103,14 @@ under a JDK version the Checker Framework lists as tested (8, 11, 17, or 21) pro
 any other JDK version, the Checker Framework additionally emits a `compiler.note.proc.messager`
 finding warning that the JDK is untested -- harmless, but it will show up as an extra result.)
 
-Notice `ruleId` is `dereference.of.nullable` -- the Checker Framework's own specific finding
-identifier -- not the generic `compiler.err.proc.messager` code javac itself reports for every
-annotation-processor-issued diagnostic regardless of which checker or rule fired.
-`SarifReporter` extracts it from the `[messageKey]` prefix every Checker Framework message
-carries (see `SarifReporter`'s Javadoc), specifically so that results from different checks are
-distinguishable by `ruleId` -- which is what makes a per-rule baseline comparison possible in the
-first place.
+Notice the two results have different `ruleId`s: `dereference.of.nullable` for the Checker
+Framework finding, and `compiler.err.prob.found.req` -- javac's own diagnostic code -- for the
+plain type error. Without `SarifReporter`'s extraction, *both* Checker Framework findings (there
+can be many, from many different checks) would collapse onto the single generic
+`compiler.err.proc.messager` code javac uses for every annotation-processor-issued diagnostic,
+regardless of which specific check fired; `SarifReporter` extracts each one's `[messageKey]`
+prefix instead (see its Javadoc), specifically so that results are distinguishable by `ruleId` --
+which is what makes a per-rule baseline comparison possible in the first place.
 
 ## Running it via Gradle
 
