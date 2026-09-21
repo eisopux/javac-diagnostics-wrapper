@@ -3,7 +3,7 @@ package io.github.eisopux.diagnostics.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.tools.*;
+import javax.tools.JavaCompiler;
 
 /**
  * CompilerRunner sets up and executes a Java compilation task using the system Java compiler.
@@ -50,25 +50,24 @@ public class CompilerRunner {
      * </ul>
      *
      * @param args the command-line arguments to be used in the compilation task
+     * @return {@code true} if and only if the compilation completed without errors
      */
-    public void run(String[] args) {
+    public boolean run(String[] args) {
 
-        CompilationTaskBuilder builder = CompilationTaskBuilder.fromArgs(args);
-        collectors.forEach(c -> c.onBeforeCompile(builder));
+        boolean success;
+        try (CompilationTaskBuilder builder = CompilationTaskBuilder.fromArgs(args)) {
+            collectors.forEach(c -> c.onBeforeCompile(builder));
 
-        JavaCompiler.CompilationTask task = builder.build();
+            JavaCompiler.CompilationTask task = builder.build();
 
-        boolean success = task.call();
+            success = task.call();
+        }
 
         CompilationReportData reportData = new CompilationReportData();
 
         collectors.forEach(c -> c.onAfterCompile(reportData));
 
-        if (success) {
-            // Placeholder for future use. Bool `success` is true iff compilation
-            // completes without any errors. Add logic here if a specific Collector
-            // or other feature requires a successful compilation.
-        }
         reporter.generateReport(reportData);
+        return success;
     }
 }

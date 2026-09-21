@@ -80,7 +80,9 @@ public class LspReporter implements Reporter {
                                             return fileUriObj != null
                                                     ? fileUriObj.toString()
                                                     : "unknown";
-                                        }));
+                                        },
+                                        LinkedHashMap::new,
+                                        Collectors.toList()));
 
         List<Map<String, Object>> output = new ArrayList<>();
         for (Map.Entry<String, List<Map<String, Object>>> entry : grouped.entrySet()) {
@@ -102,14 +104,8 @@ public class LspReporter implements Reporter {
     private Map<String, Object> transformDiagnosticToLSP(Map<String, Object> diag) {
         Map<String, Object> lspDiag = new LinkedHashMap<>();
 
-        int line =
-                diag.get("lineNumber") != null
-                        ? ((Number) diag.get("lineNumber")).intValue() - 1
-                        : 0;
-        int column =
-                diag.get("columnNumber") != null
-                        ? ((Number) diag.get("columnNumber")).intValue() - 1
-                        : 0;
+        int line = toZeroBasedOrDefault(diag.get("lineNumber"));
+        int column = toZeroBasedOrDefault(diag.get("columnNumber"));
         int endColumn = column + 2; // Assume a fixed width; adjust as needed.
 
         lspDiag.put("range", createRange(line, column, endColumn));
@@ -125,6 +121,19 @@ public class LspReporter implements Reporter {
         lspDiag.put("source", processorName != null ? processorName : "javac");
 
         return lspDiag;
+    }
+
+    /**
+     * Converts a 1-based javac line/column number to a 0-based LSP one, defaulting to {@code 0}
+     * when the value is absent or {@link javax.tools.Diagnostic#NOPOS} (javac's marker for "no
+     * position available"), rather than underflowing to a negative LSP position.
+     */
+    private static int toZeroBasedOrDefault(Object oneBasedPosition) {
+        if (!(oneBasedPosition instanceof Number)) {
+            return 0;
+        }
+        int oneBased = ((Number) oneBasedPosition).intValue();
+        return oneBased > 0 ? oneBased - 1 : 0;
     }
 
     /** Helper to create an LSP range object. */
@@ -162,7 +171,7 @@ public class LspReporter implements Reporter {
 
         private final int lspSeverity;
 
-        private DiagnosticKind(int severity) {
+        DiagnosticKind(int severity) {
             this.lspSeverity = severity;
         }
 

@@ -1,7 +1,7 @@
 package io.github.eisopux.diagnostics.core;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +27,7 @@ public class CompilationReportData {
      *       {@code "ERROR"} or key {@code "line"} with value {@code 42})
      * </ul>
      */
-    private final Map<String, List<Map<String, Object>>> sections = new HashMap<>();
+    private final Map<String, List<Map<String, Object>>> sections = new LinkedHashMap<>();
 
     /**
      * Associates the specified section data with the given section identifier.
