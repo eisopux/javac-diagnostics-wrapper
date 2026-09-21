@@ -15,11 +15,14 @@ import com.jetbrains.qodana.sarif.model.Tool;
 import com.jetbrains.qodana.sarif.model.ToolComponent;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.tools.Diagnostic;
 
@@ -54,6 +57,24 @@ public class SarifReporter implements Reporter {
      */
     private static final String DRIVER_NAME = "javac";
 
+    /**
+     * javac's diagnostic code for any message an annotation processor issues through {@code
+     * Messager} -- e.g. every error/warning the Checker Framework reports. Such a message's actual,
+     * specific identity is a {@code [messageKey]} (optionally {@code [checker:messageKey]} under
+     * {@code -AshowPrefixInWarningMessages}) prefix on the message text itself, not the {@code
+     * code} field, which is this same generic value for every one of them regardless of checker or
+     * kind of problem. Confirmed by running the Nullness Checker directly: the prefix is present
+     * with or without that flag.
+     */
+    private static final Set<String> PROCESSOR_MESSAGE_CODES =
+            new LinkedHashSet<>(
+                    Arrays.asList(
+                            "compiler.err.proc.messager",
+                            "compiler.warn.proc.messager",
+                            "compiler.note.proc.messager"));
+
+    private static final Pattern MESSAGE_KEY_PREFIX = Pattern.compile("^\\[([^\\]]+)\\]\\s*");
+
     @Override
     public void generateReport(CompilationReportData reportData) {
         List<Map<String, Object>> diagnostics = reportData.getSection("diagnostics");
@@ -86,12 +107,25 @@ public class SarifReporter implements Reporter {
 
     /** Converts one collected diagnostic (see DiagnosticCollector) into a SARIF result. */
     private static Result toResult(Map<String, Object> diagnostic) {
-        Message message = new Message().withText(String.valueOf(diagnostic.get("message")));
-        Result result = new Result(message).withLevel(toLevel(diagnostic.get("kind")));
+        String messageText = String.valueOf(diagnostic.get("message"));
+        String ruleId = null;
 
         Object code = diagnostic.get("code");
-        if (code != null) {
-            result = result.withRuleId(code.toString());
+        if (code != null && PROCESSOR_MESSAGE_CODES.contains(code.toString())) {
+            Matcher keyMatcher = MESSAGE_KEY_PREFIX.matcher(messageText);
+            if (keyMatcher.find()) {
+                ruleId = keyMatcher.group(1);
+                messageText = messageText.substring(keyMatcher.end());
+            }
+        }
+        if (ruleId == null && code != null) {
+            ruleId = code.toString();
+        }
+
+        Message message = new Message().withText(messageText);
+        Result result = new Result(message).withLevel(toLevel(diagnostic.get("kind")));
+        if (ruleId != null) {
+            result = result.withRuleId(ruleId);
         }
 
         Location location = toLocation(diagnostic);
