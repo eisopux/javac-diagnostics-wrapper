@@ -14,10 +14,21 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        // Publishes com.jetbrains.qodana:qodana-sarif (SarifReporter's SARIF 2.1.0 model), which
+        // is not mirrored to Maven Central. See SarifReporter's class Javadoc before adding any
+        // further dependency on this library elsewhere.
+        url = 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies'
+        content {
+            includeGroup 'com.jetbrains.qodana'
+        }
+    }
 }
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
+    // Experimental: see SarifReporter's class Javadoc for why this is confined to one file.
+    implementation 'com.jetbrains.qodana:qodana-sarif:1.0.33'
     testImplementation 'junit:junit:4.13.2'
     if (JavaVersion.current() >= JavaVersion.VERSION_21) {
         errorprone('com.google.errorprone:error_prone_core:2.50.0')

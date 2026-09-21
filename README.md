@@ -35,10 +35,13 @@ java \
 ```
 (where `[flags]` is a placeholder for 0 or more actual javac flags you're using)
 
-There are currently two builtin outputs using a Diagnostics Collector:
+There are currently three builtin outputs using a Diagnostics Collector:
 - `io.github.eisopux.diagnostics.builtin.LspDiagnostics` produces output in the [LSP JSON format](https://microsoft.github.io/language-server-protocol/specification).
 - `io.github.eisopux.diagnostics.builtin.JsonDiagnostics` produces output in a JSON format
    directly corresponding to the javac diagnostics.
+- `io.github.eisopux.diagnostics.builtin.SarifDiagnostics` produces output in the
+  [SARIF 2.1.0 format](https://sarifweb.azurewebsites.net). **Experimental**: see
+  `SarifReporter`'s class Javadoc for why (eisopux/javac-diagnostics-wrapper#152).
 
 
 ## Examples
@@ -125,6 +128,64 @@ results in:
 ```
 Note that the `-AshowPrefixInWarningMessages` is an optional Checker Framework flag
 and will attach correct processor information to formats that support this information.
+
+Compilation of a file with an error, using the SARIF format:
+
+```shell
+java \
+    -cp /path/to/javac-diagnostics-wrapper-all.jar \
+    io.github.eisopux.diagnostics.builtin.SarifDiagnostics \
+    File1.java
+```
+
+results in
+
+```
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "javac",
+          "rules": [
+            {
+              "id": "compiler.err.prob.found.req"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "compiler.err.prob.found.req",
+          "level": "error",
+          "message": {
+            "text": "incompatible types: java.lang.String cannot be converted to int"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///.../File1.java"
+                },
+                "region": {
+                  "startLine": 3,
+                  "startColumn": 17,
+                  "charOffset": 50,
+                  "charLength": 12
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+(trimmed here to the fields this project sets; the actual output additionally carries a handful
+of schema-default fields such as `driver.language`/`run.newlineSequences` that the SARIF library
+fills in on its own.)
 
 ## How to Develop
 
