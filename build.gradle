@@ -39,6 +39,21 @@ tasks.withType(JavaCompile) { compilationTask ->
 shadowJar {
 }
 
+// Gradle's `build`/`assemble` only compile and package the application; they never execute it,
+// so a mainClass that names a nonexistent class (or any other startup failure) is otherwise
+// invisible until someone actually runs the packaged jar or `./gradlew run`. This runs the real
+// application against a trivial fixture file and fails the build if it exits non-zero.
+tasks.register('smokeTest', JavaExec) {
+    description = 'Runs the packaged application against a trivial file to catch a broken mainClass or other startup failure.'
+    group = 'verification'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.mainClass
+    workingDir = rootDir
+    args = ['smoketest/Smoke.java']
+}
+
+check.dependsOn smokeTest
+
 spotless {
     java {
         googleJavaFormat().aosp()
