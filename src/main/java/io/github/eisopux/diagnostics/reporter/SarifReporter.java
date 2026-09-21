@@ -6,6 +6,7 @@ import com.jetbrains.qodana.sarif.model.Level;
 import com.jetbrains.qodana.sarif.model.Location;
 import com.jetbrains.qodana.sarif.model.Message;
 import com.jetbrains.qodana.sarif.model.PhysicalLocation;
+import com.jetbrains.qodana.sarif.model.PropertyBag;
 import com.jetbrains.qodana.sarif.model.Region;
 import com.jetbrains.qodana.sarif.model.ReportingDescriptor;
 import com.jetbrains.qodana.sarif.model.Result;
@@ -47,6 +48,14 @@ import io.github.eisopux.diagnostics.core.Reporter;
  * {@code tool.driver}, one {@code result} per collected diagnostic, and at most one {@code
  * location} per result. Fields the collected data has no equivalent for (code flows, fixes,
  * baselines, multiple runs, ...) are left out rather than populated with placeholder values.
+ *
+ * <p>A {@code ruleId} alone does not identify which checker reported a finding: different checkers
+ * can and do report the same message key (e.g. {@code assignment.type.incompatible} is used by many
+ * type systems), so two results with the same {@code ruleId} are not necessarily the same actual
+ * rule. When the diagnostic message has a {@code [checker:messageKey]} prefix (i.e. the Checker
+ * Framework was run with {@code -AshowPrefixInWarningMessages}), the checker name is split out and
+ * set as a {@code checker} entry in the result's {@code properties} bag, so consumers that need to
+ * disambiguate can do so without re-parsing the message text.
  */
 public class SarifReporter implements Reporter {
 
@@ -73,7 +82,13 @@ public class SarifReporter implements Reporter {
                             "compiler.warn.proc.messager",
                             "compiler.note.proc.messager"));
 
-    private static final Pattern MESSAGE_KEY_PREFIX = Pattern.compile("^\\[([^\\]]+)\\]\\s*");
+    /**
+     * Matches a {@code [messageKey]} or {@code [checker:messageKey]} prefix. Group 1 (the checker
+     * name) is {@code null} unless {@code -AshowPrefixInWarningMessages} was used; group 2 (the
+     * message key) is always present when this pattern matches.
+     */
+    private static final Pattern MESSAGE_KEY_PREFIX =
+            Pattern.compile("^\\[(?:([^:\\]]+):)?([^\\]]+)\\]\\s*");
 
     @Override
     public void generateReport(CompilationReportData reportData) {
@@ -115,12 +130,14 @@ public class SarifReporter implements Reporter {
     private static Result toResult(Map<String, Object> diagnostic) {
         String messageText = String.valueOf(diagnostic.get("message"));
         String ruleId = null;
+        String checker = null;
 
         Object code = diagnostic.get("code");
         if (code != null && PROCESSOR_MESSAGE_CODES.contains(code.toString())) {
             Matcher keyMatcher = MESSAGE_KEY_PREFIX.matcher(messageText);
             if (keyMatcher.find()) {
-                ruleId = keyMatcher.group(1);
+                checker = keyMatcher.group(1);
+                ruleId = keyMatcher.group(2);
                 messageText = messageText.substring(keyMatcher.end());
             }
         }
@@ -132,6 +149,11 @@ public class SarifReporter implements Reporter {
         Result result = new Result(message).withLevel(toLevel(diagnostic.get("kind")));
         if (ruleId != null) {
             result = result.withRuleId(ruleId);
+        }
+        if (checker != null) {
+            PropertyBag properties = new PropertyBag();
+            properties.put("checker", checker);
+            result = result.withProperties(properties);
         }
 
         Location location = toLocation(diagnostic);
