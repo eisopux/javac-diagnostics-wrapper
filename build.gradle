@@ -116,6 +116,10 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
         // See demo/checker-framework/InterningError.java's Javadoc for why this is required to
         // get findings from both checkers, rather than javac stopping after the first one's.
         '-Awarns',
+        // Without this, both checkers' dereference.of.nullable-style findings would carry only
+        // their bare message key as ruleId, with no way to tell which checker reported which --
+        // see SarifReporter's class Javadoc for the "checker" property this enables.
+        '-AshowPrefixInWarningMessages',
         'demo/checker-framework/Demo.java',
         'demo/checker-framework/InterningError.java',
         'demo/checker-framework/OtherError.java'
@@ -128,9 +132,10 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
     }
     doLast {
         String sarif = outputFile.text
-        // One finding from each of two different checkers (each one's own message key as ruleId)
-        // and one plain javac diagnostic (its raw code as ruleId) -- see OtherError.java's
-        // Javadoc for why that one must be a separate finding from the other two.
+        // One finding from each of two different checkers (each one's own message key as ruleId,
+        // plus a "checker" property naming which one) and one plain javac diagnostic (its raw
+        // code as ruleId, no "checker" property) -- see OtherError.java's Javadoc for why that
+        // one must be a separate finding from the other two.
         List<String> expectedRuleIds = [
             'dereference.of.nullable',
             'not.interned',
@@ -139,8 +144,12 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
         List<String> missing = expectedRuleIds.findAll {
             !sarif.contains("\"ruleId\": \"${it}\"")
         }
+        List<String> expectedCheckers = ['nullness', 'interning']
+        missing += expectedCheckers.findAll {
+            !sarif.contains("\"checker\": \"${it}\"")
+        }
         if (!missing.isEmpty()) {
-            throw new GradleException("Expected SARIF results with ruleId ${missing}; got:\n${sarif}")
+            throw new GradleException("Expected SARIF results with ruleId/checker ${missing}; got:\n${sarif}")
         }
         logger.lifecycle("Wrote SARIF demo output to ${outputFile}")
     }

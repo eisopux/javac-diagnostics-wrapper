@@ -22,6 +22,7 @@ java \
     -classpath /path/to/checker-framework/checker/dist/checker.jar \
     -processor org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.interning.InterningChecker \
     -Awarns \
+    -AshowPrefixInWarningMessages \
     Demo.java InterningError.java OtherError.java
 ```
 
@@ -45,6 +46,14 @@ providing multiple checkers, if one checker detects any error, subsequent checke
 (Confirmed directly: without `-Awarns`, only the first-listed checker's finding showed up at all,
 regardless of which checker was listed first or whether its bug was in the same file as the
 other's.) `-Awarns` demotes checker errors to warnings, which does not trigger that stop.
+
+`-AshowPrefixInWarningMessages` is also needed, for a different reason: many message keys are not
+unique to one checker (e.g. `assignment.type.incompatible` is reported by several different type
+systems), so a bare `ruleId` alone cannot always tell you which checker actually reported a given
+result. This flag makes the Checker Framework prefix each message with `[checker:messageKey]`
+instead of just `[messageKey]`; `SarifReporter` splits that prefix into the `ruleId` (still just
+the message key, so it stays comparable across runs with or without the flag) and a `checker`
+entry in the result's `properties` bag.
 
 Running the command above under a JDK version the Checker Framework lists as tested (8, 11, 17, or
 21) produces:
@@ -83,7 +92,8 @@ Running the command above under a JDK version the Checker Framework lists as tes
                 }
               }
             }
-          ]
+          ],
+          "properties": { "checker": "nullness" }
         },
         {
           "ruleId": "not.interned",
@@ -105,7 +115,8 @@ Running the command above under a JDK version the Checker Framework lists as tes
                 }
               }
             }
-          ]
+          ],
+          "properties": { "checker": "interning" }
         },
         {
           "ruleId": "compiler.err.prob.found.req",
@@ -146,6 +157,15 @@ specific rule fired; `SarifReporter` extracts each one's `[messageKey]` prefix i
 Javadoc), specifically so that results from different checks -- and different checkers -- are
 distinguishable by `ruleId`, which is what makes a per-rule baseline comparison possible across
 more than one checker in the first place.
+
+Also notice the two checker findings each carry a `"properties": { "checker": ... }`, but the
+plain javac finding does not. A `ruleId` by itself is not always enough to tell checkers apart:
+this demo's two message keys happen to be unique to their checker, but many message keys are
+reused across type systems (`assignment.type.incompatible`, for instance, is reported by several
+different checkers), so a consumer that groups or filters results by `ruleId` alone could conflate
+findings from two unrelated checkers. The `checker` property resolves that without having to
+re-parse the message text; it is only present when `-AshowPrefixInWarningMessages` gave
+`SarifReporter` a checker name to extract in the first place.
 
 ## Running it via Gradle
 
