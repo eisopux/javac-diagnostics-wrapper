@@ -25,11 +25,21 @@ repositories {
     }
 }
 
+configurations {
+    // Deliberately not `implementation`/`compileOnly`/`testImplementation`: the packaged
+    // application has no dependency on the Checker Framework. This configuration exists only to
+    // put it on the classpath the checkerFrameworkDemo task below passes to SarifDiagnostics as
+    // an annotation processor, the same way any other caller of the packaged jar would. See
+    // demo/checker-framework/README.md.
+    checkerFrameworkDemo
+}
+
 dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
     // Experimental: see SarifReporter's class Javadoc for why this is confined to one file.
     implementation 'com.jetbrains.qodana:qodana-sarif:1.0.33'
     testImplementation 'junit:junit:4.13.2'
+    checkerFrameworkDemo 'io.github.eisop:checker:3.49.5-eisop1'
     if (JavaVersion.current() >= JavaVersion.VERSION_21) {
         errorprone('com.google.errorprone:error_prone_core:2.50.0')
     }
@@ -70,6 +80,57 @@ tasks.register('smokeTest', JavaExec) {
 }
 
 check.dependsOn smokeTest
+
+// Demonstrates -- and regression-tests -- using SarifDiagnostics together with the EISOP Checker
+// Framework's Nullness Checker as an annotation processor, entirely from the checkerFrameworkDemo
+// configuration above; the packaged application itself has no Checker Framework dependency. See
+// demo/checker-framework/README.md for the full explanation and how to run this by hand.
+tasks.register('checkerFrameworkDemo', JavaExec) {
+    description = 'Runs the Nullness Checker on the demo file through SarifDiagnostics and checks the SARIF output.'
+    group = 'verification'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.github.eisopux.diagnostics.builtin.SarifDiagnostics'
+    workingDir = rootDir
+    // Demo.java has an intentional Nullness Checker violation, so SarifDiagnostics is expected to
+    // exit 1; that is not this task's failure.
+    ignoreExitValue = true
+    // The Checker Framework reaches into javac internals not exported by default on JDK 16+.
+    jvmArgs = [
+        'com.sun.tools.javac.api',
+        'com.sun.tools.javac.code',
+        'com.sun.tools.javac.comp',
+        'com.sun.tools.javac.file',
+        'com.sun.tools.javac.main',
+        'com.sun.tools.javac.parser',
+        'com.sun.tools.javac.processing',
+        'com.sun.tools.javac.tree',
+        'com.sun.tools.javac.util'
+    ].collect { "--add-opens=jdk.compiler/${it}=ALL-UNNAMED" }
+    args = [
+        '-classpath',
+        configurations.checkerFrameworkDemo.asPath,
+        '-processor',
+        'org.checkerframework.checker.nullness.NullnessChecker',
+        'demo/checker-framework/Demo.java'
+    ]
+
+    def outputFile = file("${buildDir}/demo/checker-framework-nullness.sarif.json")
+    doFirst {
+        outputFile.parentFile.mkdirs()
+        standardOutput = new FileOutputStream(outputFile)
+    }
+    doLast {
+        String sarif = outputFile.text
+        if (!sarif.contains('"ruleId": "dereference.of.nullable"')) {
+            throw new GradleException(
+            "Expected a dereference.of.nullable SARIF result from the Nullness Checker; " +
+            "got:\n${sarif}")
+        }
+        logger.lifecycle("Wrote SARIF demo output to ${outputFile}")
+    }
+}
+
+check.dependsOn checkerFrameworkDemo
 
 spotless {
     java {

@@ -252,6 +252,12 @@ Where `.addCollector` should be called one or more times to combine
 multiple collectors and `.setReporter` should be called exactly once to select 
 the desired output format.
 
+## Demos
+
+- [`demo/checker-framework/`](demo/checker-framework/README.md): using this wrapper together with
+  the [EISOP Checker Framework](https://eisop.github.io/) to get a SARIF baseline of a checker's
+  findings on an existing codebase.
+
 ## Acknowledgements
 
 - [Compiler API guide](http://openjdk.java.net/groups/compiler/guide/compilerAPI.html)
