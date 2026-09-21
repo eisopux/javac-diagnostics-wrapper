@@ -49,7 +49,13 @@ tasks.register('smokeTest', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = application.mainClass
     workingDir = rootDir
-    args = ['smoketest/Smoke.java']
+    // Without an explicit -d, javac writes Smoke.class next to Smoke.java, littering the source
+    // tree on every run.
+    args = [
+        '-d',
+        "${buildDir}/smokeTest",
+        'smoketest/Smoke.java'
+    ]
 }
 
 check.dependsOn smokeTest
