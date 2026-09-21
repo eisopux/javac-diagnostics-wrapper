@@ -20,6 +20,16 @@ plugins {
 group = 'io.github.eisopux'
 version = '0.1.0-SNAPSHOT'
 
+// The JDK to compile and run with, defaulting to whichever JVM is currently running Gradle (the
+// usual case for a local `./gradlew build`). CI instead always runs Gradle under one fixed JDK
+// and passes this explicitly via -PuseJdkVersion (or ORG_GRADLE_PROJECT_useJdkVersion) once per
+// JDK in the support matrix, the same way eisop/checker-framework's build.gradle does -- this
+// project's Gradle version requires JDK 17+ to run at all, so it could not run directly under an
+// older JDK like 11 even if we wanted it to.
+int currentRuntimeJavaVersion = JavaVersion.current().majorVersion as int
+String useJdkVersionProp = findProperty('useJdkVersion')
+int useJdkVersionInt = useJdkVersionProp == null ? currentRuntimeJavaVersion : (useJdkVersionProp as int)
+
 repositories {
     mavenCentral()
     maven {
@@ -48,7 +58,13 @@ dependencies {
     implementation 'com.jetbrains.qodana:qodana-sarif:1.0.33'
     testImplementation 'junit:junit:4.13.2'
     checkerFrameworkDemo 'io.github.eisop:checker:3.49.5-eisop1'
-    if (JavaVersion.current() >= JavaVersion.VERSION_21) {
+    // error_prone_core's class files require a JDK 21+ JVM to load, regardless of the "supports
+    // JDK 17+ sources" the net.ltgt.errorprone plugin advertises -- confirmed by actually running
+    // this dependency's compiler plugin under a JDK 17 toolchain (UnsupportedClassVersionError,
+    // class file version 65.0 i.e. Java 21). Keep this in sync with options.errorprone.enabled
+    // below: they drifted out of sync once before (eisopux/javac-diagnostics-wrapper#134), when
+    // CI never actually built under anything but JDK 21 and so never caught the mismatch.
+    if (useJdkVersionInt >= 21) {
         errorprone('com.google.errorprone:error_prone_core:2.50.0')
     }
 }
@@ -64,9 +80,35 @@ java {
     withSourcesJar()
 }
 
+boolean useToolchains = (currentRuntimeJavaVersion != useJdkVersionInt)
+if (useToolchains) {
+    // On CI, Gradle always runs under one fixed JDK and a different JDK is selected as a
+    // toolchain, to actually build and run under each JDK in the support matrix rather than
+    // only ever under whichever JDK Gradle itself happens to run on.
+    // See https://docs.gradle.org/current/userguide/toolchains.html
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(useJdkVersionInt)
+        }
+    }
+
+    // JavaExec (smokeTest, checkerFrameworkDemo) does not automatically inherit the toolchain JDK.
+    tasks.withType(JavaExec).configureEach {
+        javaLauncher = javaToolchains.launcherFor {
+            languageVersion = JavaLanguageVersion.of(useJdkVersionInt)
+        }
+    }
+    // JavaCompile also needs an explicit nudge.
+    tasks.withType(JavaCompile).configureEach {
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(useJdkVersionInt)
+        }
+    }
+}
+
 tasks.withType(JavaCompile) { compilationTask ->
     options.compilerArgs += ['-Xlint:-options', '-Werror']
-    options.errorprone.enabled = JavaVersion.current() >= JavaVersion.VERSION_17
+    options.errorprone.enabled = useJdkVersionInt >= 21
     sourceCompatibility = 8
     targetCompatibility = 8
 }

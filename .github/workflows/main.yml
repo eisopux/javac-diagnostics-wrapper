@@ -9,11 +9,18 @@ on:
 permissions:
   contents: read
 
+env:
+  # The JDK Gradle itself always runs under in CI (this project's Gradle version requires 17+).
+  # Each matrix.jdk is instead selected as a build.gradle toolchain, so the project is actually
+  # compiled and run under every JDK in the matrix, not just whichever one Gradle happens to use.
+  PRIMARY_JDK: "21"
+
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
-        jdk: [ 11, 17, 21 ]
+        jdk: [ 11, 17, 21, 25 ]
     runs-on: ubuntu-latest
     steps:
       - name: Pull Request Checkout
@@ -25,18 +32,20 @@ jobs:
       - name: Push Checkout
         uses: actions/checkout@v7
         if: github.head_ref == ''
-      - name: Set up JDK 21 for Gradle
+      - name: Set up primary JDK ${{ env.PRIMARY_JDK }}
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: 21
-      - name: Set up JDK
+          distribution: 'zulu'
+          java-version: ${{ env.PRIMARY_JDK }}
+      - name: Set up target JDK ${{ matrix.jdk }}
+        if: ${{ matrix.jdk != env.PRIMARY_JDK }}
         uses: actions/setup-java@v5
         with:
-          distribution: 'temurin'
-          java-version: ${{matrix.jdk}}
-      - name: Use JDK 21 for Gradle
-        run: mkdir -p ~/.gradle && echo "org.gradle.java.home=$JAVA_HOME_21_X64" >> ~/.gradle/gradle.properties
+          distribution: 'zulu'
+          java-version: ${{ matrix.jdk }}
+      - name: Pin Gradle to the primary JDK
+        if: ${{ matrix.jdk != env.PRIMARY_JDK }}
+        run: mkdir -p ~/.gradle && echo "org.gradle.java.home=$JAVA_HOME_${{ env.PRIMARY_JDK }}_X64" >> ~/.gradle/gradle.properties
       - name: Version information
         run: java -version && ./gradlew -version
       - name: Github Environment Setup
@@ -45,3 +54,5 @@ jobs:
           echo "REPO_SITE=${owner}" >> $GITHUB_ENV
       - name: Build with Gradle
         run: ./gradlew build --warning-mode all
+        env:
+          ORG_GRADLE_PROJECT_useJdkVersion: ${{ matrix.jdk }}
