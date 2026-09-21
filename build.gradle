@@ -8,7 +8,7 @@ plugins {
     id 'eclipse'
     // https://plugins.gradle.org/plugin/com.gradleup.shadow
     id 'com.gradleup.shadow' version '9.4.1'
-    id 'com.diffplug.spotless' version '8.3.0'
+    id 'com.diffplug.spotless' version '8.10.2'
     id 'net.ltgt.errorprone' version '5.1.0'
 }
 
@@ -20,7 +20,7 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
     testImplementation 'junit:junit:4.13.2'
     if (JavaVersion.current() >= JavaVersion.VERSION_21) {
-        errorprone('com.google.errorprone:error_prone_core:2.48.0')
+        errorprone('com.google.errorprone:error_prone_core:2.50.0')
     }
 }
 
@@ -48,7 +48,7 @@ spotless {
     groovyGradle {
         target '*.gradle'
         importOrder()
-        greclipse()  // which formatter Spotless should use to format .gradle files.
+        greclipse() // which formatter Spotless should use to format .gradle files.
         leadingTabsToSpaces(4)
         trimTrailingWhitespace()
     }
