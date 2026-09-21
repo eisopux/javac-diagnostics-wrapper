@@ -257,6 +257,12 @@ tasks.withType(Sign).configureEach {
     }
 }
 
+// Regression-tests the publication itself (POM metadata, javadoc/sources jars, ...) on every
+// build, the same way smokeTest and checkerFrameworkDemo regression-test other parts of the
+// project. Needs no credentials or signing: it only writes to the local ~/.m2 repository, and
+// signing is skipped for a snapshot version without -Prelease (see above).
+check.dependsOn publishToMavenLocal
+
 spotless {
     java {
         googleJavaFormat().aosp()
