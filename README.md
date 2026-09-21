@@ -258,6 +258,39 @@ the desired output format.
   the [EISOP Checker Framework](https://eisop.github.io/) to get a SARIF baseline of a checker's
   findings on an existing codebase.
 
+## Releasing
+
+This project publishes to Maven Central under the `io.github.eisopux` groupId, using plain
+Gradle `maven-publish`/`signing` (no third-party publishing plugin), the same approach
+[eisop/checker-framework uses](https://github.com/eisop/checker-framework/blob/master/docs/developer/maven-central-publishing.md)
+-- see that doc for the general explanation of why a Central Publishing Portal plugin isn't used,
+and for background on the publish/staging/signing flow.
+
+One-time maintainer setup, before the first release:
+
+- Publish rights on the `io.github.eisopux` namespace in the
+  [Central Portal](https://central.sonatype.com/). This is a separate namespace from
+  checker-framework's own `io.github.eisop`, verified against the `eisopux` GitHub org, and
+  needs its own verification even if you already hold `io.github.eisop`.
+- A GPG key on a public keyserver, and `signing.gnupg.keyName` set to it (in
+  `~/.gradle/gradle.properties` or via `-Psigning.gnupg.keyName=...`).
+- A Central Portal user token, set as `SONATYPE_NEXUS_USERNAME`/`SONATYPE_NEXUS_PASSWORD` Gradle
+  properties.
+
+To publish a release:
+
+```shell
+./gradlew publish -Prelease --no-parallel
+```
+
+then log in to the [Central Portal](https://central.sonatype.com/publishing/deployments) and
+manually publish the staged deployment (this project has not automated that last click; see the
+checker-framework doc above for how it could be).
+
+Note that `com.jetbrains.qodana:qodana-sarif` (see `SarifReporter`'s class Javadoc) is not on
+Maven Central, so a consumer of this project's published artifact who uses `SarifDiagnostics`
+also needs the same custom repository declaration this project's own `build.gradle` uses.
+
 ## Acknowledgements
 
 - [Compiler API guide](http://openjdk.java.net/groups/compiler/guide/compilerAPI.html)
