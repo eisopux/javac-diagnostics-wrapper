@@ -105,7 +105,13 @@ public class SarifReporter implements Reporter {
         System.out.println(SarifUtil.createGson().toJson(sarifReport));
     }
 
-    /** Converts one collected diagnostic (see DiagnosticCollector) into a SARIF result. */
+    /**
+     * Converts one collected diagnostic (see DiagnosticCollector) into a SARIF result.
+     *
+     * @param diagnostic one diagnostic's fields, as collected by {@code DiagnosticCollector}
+     * @return the equivalent SARIF result, with a {@code ruleId} extracted per this class's Javadoc
+     *     and a {@code location} if the diagnostic has a source
+     */
     private static Result toResult(Map<String, Object> diagnostic) {
         String messageText = String.valueOf(diagnostic.get("message"));
         String ruleId = null;
@@ -136,7 +142,14 @@ public class SarifReporter implements Reporter {
         return result;
     }
 
-    /** Maps a javax.tools.Diagnostic.Kind to the closest SARIF result level. */
+    /**
+     * Maps a javax.tools.Diagnostic.Kind to the closest SARIF result level.
+     *
+     * @param kind the diagnostic's {@code kind} field; expected to be a {@link Diagnostic.Kind},
+     *     but handled defensively since it comes from an untyped map
+     * @return the corresponding {@link Level}, or {@link Level#NONE} if {@code kind} is not a
+     *     recognized {@link Diagnostic.Kind}
+     */
     private static Level toLevel(Object kind) {
         if (kind instanceof Diagnostic.Kind) {
             switch ((Diagnostic.Kind) kind) {
@@ -158,6 +171,9 @@ public class SarifReporter implements Reporter {
      * Builds a location from the diagnostic's source file and, if available, a region within it.
      * Returns {@code null} if the diagnostic has no source ({@code DiagnosticCollector} stores
      * "unknown" in that case), since "unknown" is not a URI.
+     *
+     * @param diagnostic one diagnostic's fields, as collected by {@code DiagnosticCollector}
+     * @return the diagnostic's location, or {@code null} if it has no known source
      */
     private static Location toLocation(Map<String, Object> diagnostic) {
         Object source = diagnostic.get("source");
@@ -182,6 +198,10 @@ public class SarifReporter implements Reporter {
      * whichever of those javac left as {@link Diagnostic#NOPOS} (or didn't set at all) rather than
      * inventing a value -- notably, no end line/column is guessed the way {@link LspReporter} must
      * for LSP's range model; charOffset/charLength already gives the precise span.
+     *
+     * @param diagnostic one diagnostic's fields, as collected by {@code DiagnosticCollector}
+     * @return the diagnostic's region within its source file, or {@code null} if it has no known
+     *     line number
      */
     private static Region toRegion(Map<String, Object> diagnostic) {
         Integer line = toPositiveIntOrNull(diagnostic.get("lineNumber"));
@@ -210,6 +230,9 @@ public class SarifReporter implements Reporter {
      * Returns {@code value} as a positive {@code int}, or {@code null} if it isn't a {@link
      * Number}, or is {@link Diagnostic#NOPOS} (javac's marker for "no position available") or any
      * other non-positive value.
+     *
+     * @param value the diagnostic field to convert, expected to be a {@link Number} or {@code null}
+     * @return {@code value} as a positive {@code int}, or {@code null} if it is not one
      */
     private static Integer toPositiveIntOrNull(Object value) {
         if (!(value instanceof Number)) {

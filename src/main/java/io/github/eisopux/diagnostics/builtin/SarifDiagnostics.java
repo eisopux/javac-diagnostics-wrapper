@@ -10,6 +10,13 @@ import io.github.eisopux.diagnostics.reporter.SarifReporter;
  * <p>Experimental: see {@link SarifReporter}'s class Javadoc.
  */
 public class SarifDiagnostics {
+    /**
+     * Runs javac over {@code args} (the same command-line arguments javac itself accepts) and
+     * prints the resulting diagnostics as a SARIF log.
+     *
+     * @param args javac command-line arguments, e.g. source files and {@code -classpath}/{@code
+     *     -processor} options
+     */
     public static void main(String[] args) {
         CompilerRunner runner =
                 new CompilerRunner()
