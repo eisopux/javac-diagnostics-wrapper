@@ -80,7 +80,9 @@ public class LspReporter implements Reporter {
                                             return fileUriObj != null
                                                     ? fileUriObj.toString()
                                                     : "unknown";
-                                        }));
+                                        },
+                                        LinkedHashMap::new,
+                                        Collectors.toList()));
 
         List<Map<String, Object>> output = new ArrayList<>();
         for (Map.Entry<String, List<Map<String, Object>>> entry : grouped.entrySet()) {
