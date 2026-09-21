@@ -14,11 +14,32 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        // Publishes com.jetbrains.qodana:qodana-sarif (SarifReporter's SARIF 2.1.0 model), which
+        // is not mirrored to Maven Central. See SarifReporter's class Javadoc before adding any
+        // further dependency on this library elsewhere.
+        url = 'https://packages.jetbrains.team/maven/p/ij/intellij-dependencies'
+        content {
+            includeGroup 'com.jetbrains.qodana'
+        }
+    }
+}
+
+configurations {
+    // Deliberately not `implementation`/`compileOnly`/`testImplementation`: the packaged
+    // application has no dependency on the Checker Framework. This configuration exists only to
+    // put it on the classpath the checkerFrameworkDemo task below passes to SarifDiagnostics as
+    // an annotation processor, the same way any other caller of the packaged jar would. See
+    // demo/checker-framework/README.md.
+    checkerFrameworkDemo
 }
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.14.0'
+    // Experimental: see SarifReporter's class Javadoc for why this is confined to one file.
+    implementation 'com.jetbrains.qodana:qodana-sarif:1.0.33'
     testImplementation 'junit:junit:4.13.2'
+    checkerFrameworkDemo 'io.github.eisop:checker:3.49.5-eisop1'
     if (JavaVersion.current() >= JavaVersion.VERSION_21) {
         errorprone('com.google.errorprone:error_prone_core:2.50.0')
     }
@@ -49,10 +70,92 @@ tasks.register('smokeTest', JavaExec) {
     classpath = sourceSets.main.runtimeClasspath
     mainClass = application.mainClass
     workingDir = rootDir
-    args = ['smoketest/Smoke.java']
+    // Without an explicit -d, javac writes Smoke.class next to Smoke.java, littering the source
+    // tree on every run.
+    args = [
+        '-d',
+        "${buildDir}/smokeTest",
+        'smoketest/Smoke.java'
+    ]
 }
 
 check.dependsOn smokeTest
+
+// Demonstrates -- and regression-tests -- using SarifDiagnostics together with two EISOP Checker
+// Framework checkers (Nullness and Interning) run as annotation processors at once, entirely from
+// the checkerFrameworkDemo configuration above; the packaged application itself has no Checker
+// Framework dependency. See demo/checker-framework/README.md for the full explanation, including
+// why -Awarns is required to get findings from both checkers in one run, and how to run this by
+// hand.
+tasks.register('checkerFrameworkDemo', JavaExec) {
+    description = 'Runs the Nullness and Interning Checkers on the demo files through SarifDiagnostics and checks the SARIF output.'
+    group = 'verification'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'io.github.eisopux.diagnostics.builtin.SarifDiagnostics'
+    workingDir = rootDir
+    // Demo.java, InterningError.java, and OtherError.java each have an intentional error, so
+    // SarifDiagnostics is expected to exit 1; that is not this task's failure.
+    ignoreExitValue = true
+    // The Checker Framework reaches into javac internals not exported by default on JDK 16+.
+    jvmArgs = [
+        'com.sun.tools.javac.api',
+        'com.sun.tools.javac.code',
+        'com.sun.tools.javac.comp',
+        'com.sun.tools.javac.file',
+        'com.sun.tools.javac.main',
+        'com.sun.tools.javac.parser',
+        'com.sun.tools.javac.processing',
+        'com.sun.tools.javac.tree',
+        'com.sun.tools.javac.util'
+    ].collect { "--add-opens=jdk.compiler/${it}=ALL-UNNAMED" }
+    args = [
+        '-classpath',
+        configurations.checkerFrameworkDemo.asPath,
+        '-processor',
+        'org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.interning.InterningChecker',
+        // See demo/checker-framework/InterningError.java's Javadoc for why this is required to
+        // get findings from both checkers, rather than javac stopping after the first one's.
+        '-Awarns',
+        // Without this, both checkers' dereference.of.nullable-style findings would carry only
+        // their bare message key as ruleId, with no way to tell which checker reported which --
+        // see SarifReporter's class Javadoc for the "checker" property this enables.
+        '-AshowPrefixInWarningMessages',
+        'demo/checker-framework/Demo.java',
+        'demo/checker-framework/InterningError.java',
+        'demo/checker-framework/OtherError.java'
+    ]
+
+    def outputFile = file("${buildDir}/demo/checker-framework-nullness.sarif.json")
+    doFirst {
+        outputFile.parentFile.mkdirs()
+        standardOutput = new FileOutputStream(outputFile)
+    }
+    doLast {
+        String sarif = outputFile.text
+        // One finding from each of two different checkers (each one's own message key as ruleId,
+        // plus a "checker" property naming which one) and one plain javac diagnostic (its raw
+        // code as ruleId, no "checker" property) -- see OtherError.java's Javadoc for why that
+        // one must be a separate finding from the other two.
+        List<String> expectedRuleIds = [
+            'dereference.of.nullable',
+            'not.interned',
+            'compiler.err.prob.found.req'
+        ]
+        List<String> missing = expectedRuleIds.findAll {
+            !sarif.contains("\"ruleId\": \"${it}\"")
+        }
+        List<String> expectedCheckers = ['nullness', 'interning']
+        missing += expectedCheckers.findAll {
+            !sarif.contains("\"checker\": \"${it}\"")
+        }
+        if (!missing.isEmpty()) {
+            throw new GradleException("Expected SARIF results with ruleId/checker ${missing}; got:\n${sarif}")
+        }
+        logger.lifecycle("Wrote SARIF demo output to ${outputFile}")
+    }
+}
+
+check.dependsOn checkerFrameworkDemo
 
 spotless {
     java {
