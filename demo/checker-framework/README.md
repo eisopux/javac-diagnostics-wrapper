@@ -20,20 +20,34 @@ java \
     -cp /path/to/javac-diagnostics-wrapper-all.jar \
     io.github.eisopux.diagnostics.builtin.SarifDiagnostics \
     -classpath /path/to/checker-framework/checker/dist/checker.jar \
-    -processor org.checkerframework.checker.nullness.NullnessChecker \
-    Demo.java OtherError.java
+    -processor org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.interning.InterningChecker \
+    -Awarns \
+    Demo.java InterningError.java OtherError.java
 ```
 
 (`checker/dist/checker.jar` is the Checker Framework's all-in-one jar; the `io.github.eisop:checker`
 Maven artifact used by the `checkerFrameworkDemo` Gradle task below works the same way.)
 
-Two intentionally-flawed files, on purpose: `Demo.java`'s `myObject` is only assigned a non-null
-value conditionally, so the Nullness Checker flags the unconditional `myObject.toString()`, and
-`OtherError.java` has a plain type mismatch that is a genuine javac error, unrelated to the
-Checker Framework. (They have to be separate files: a plain attribution error in a class stops the
-Checker Framework from analyzing that same class, which would silently lose the Nullness Checker
-finding if both bugs were in one file.) Running the command above under a JDK version the Checker
-Framework lists as tested (8, 11, 17, or 21) produces:
+Three intentionally-flawed files, on purpose:
+
+- `Demo.java`'s `myObject` is only assigned a non-null value conditionally, so the **Nullness
+  Checker** flags the unconditional `myObject.toString()`.
+- `InterningError.java` compares a `String` with `==` instead of `equals`, which the
+  **Interning Checker** flags.
+- `OtherError.java` has a plain type mismatch: a genuine javac error, unrelated to either checker.
+
+All three must be separate files: a plain attribution error (`OtherError.java`'s) in a class stops
+the Checker Framework from analyzing that same class, so combining it with either checker's bug
+would silently lose that checker's finding. And running *two* independent top-level checkers
+together via a comma-separated `-processor` list needs `-Awarns`: per the manual's own description
+of `-processor`, "javac stops processing an indeterminate time after detecting an error. When
+providing multiple checkers, if one checker detects any error, subsequent checkers may not run."
+(Confirmed directly: without `-Awarns`, only the first-listed checker's finding showed up at all,
+regardless of which checker was listed first or whether its bug was in the same file as the
+other's.) `-Awarns` demotes checker errors to warnings, which does not trigger that stop.
+
+Running the command above under a JDK version the Checker Framework lists as tested (8, 11, 17, or
+21) produces:
 
 ```json
 {
@@ -45,6 +59,7 @@ Framework lists as tested (8, 11, 17, or 21) produces:
           "name": "javac",
           "rules": [
             { "id": "dereference.of.nullable" },
+            { "id": "not.interned" },
             { "id": "compiler.err.prob.found.req" }
           ]
         }
@@ -52,21 +67,41 @@ Framework lists as tested (8, 11, 17, or 21) produces:
       "results": [
         {
           "ruleId": "dereference.of.nullable",
-          "level": "error",
+          "level": "warning",
           "message": {
             "text": "dereference of possibly-null reference myObject"
           },
           "locations": [
             {
               "physicalLocation": {
+                "artifactLocation": { "uri": "file:///.../demo/checker-framework/Demo.java" },
+                "region": {
+                  "startLine": 23,
+                  "startColumn": 28,
+                  "charOffset": 1020,
+                  "charLength": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "not.interned",
+          "level": "warning",
+          "message": {
+            "text": "attempting to use a non-@Interned comparison operand"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
                 "artifactLocation": {
-                  "uri": "file:///.../demo/checker-framework/Demo.java"
+                  "uri": "file:///.../demo/checker-framework/InterningError.java"
                 },
                 "region": {
-                  "startLine": 16,
-                  "startColumn": 28,
-                  "charOffset": 721,
-                  "charLength": 8
+                  "startLine": 25,
+                  "startColumn": 16,
+                  "charOffset": 1475,
+                  "charLength": 1
                 }
               }
             }
@@ -81,13 +116,11 @@ Framework lists as tested (8, 11, 17, or 21) produces:
           "locations": [
             {
               "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "file:///.../demo/checker-framework/OtherError.java"
-                },
+                "artifactLocation": { "uri": "file:///.../demo/checker-framework/OtherError.java" },
                 "region": {
                   "startLine": 16,
                   "startColumn": 25,
-                  "charOffset": 898,
+                  "charOffset": 970,
                   "charLength": 14
                 }
               }
@@ -99,18 +132,20 @@ Framework lists as tested (8, 11, 17, or 21) produces:
   ]
 }
 ```
-(trimmed to the fields this project sets; copy-pasted from an actual run, not hand-written. On
-any other JDK version, the Checker Framework additionally emits a `compiler.note.proc.messager`
-finding warning that the JDK is untested -- harmless, but it will show up as an extra result.)
+(trimmed to the fields this project sets; copy-pasted from an actual run, not hand-written. Note
+`level` is `"warning"` for the two checker findings because of `-Awarns`, but stays `"error"` for
+the plain javac diagnostic, which `-Awarns` does not affect.)
 
-Notice the two results have different `ruleId`s: `dereference.of.nullable` for the Checker
-Framework finding, and `compiler.err.prob.found.req` -- javac's own diagnostic code -- for the
-plain type error. Without `SarifReporter`'s extraction, *both* Checker Framework findings (there
-can be many, from many different checks) would collapse onto the single generic
-`compiler.err.proc.messager` code javac uses for every annotation-processor-issued diagnostic,
-regardless of which specific check fired; `SarifReporter` extracts each one's `[messageKey]`
-prefix instead (see its Javadoc), specifically so that results are distinguishable by `ruleId` --
-which is what makes a per-rule baseline comparison possible in the first place.
+Notice all three results have different `ruleId`s: `dereference.of.nullable` and `not.interned` --
+each checker's own specific finding identifier -- and `compiler.err.prob.found.req`, javac's own
+diagnostic code, for the plain type error. Without `SarifReporter`'s extraction, *every* Checker
+Framework finding from *either* checker (there can be many, from many different checks) would
+collapse onto the single generic `compiler.err.proc.messager`/`compiler.warn.proc.messager` code
+javac uses for every annotation-processor-issued diagnostic, regardless of which checker or which
+specific rule fired; `SarifReporter` extracts each one's `[messageKey]` prefix instead (see its
+Javadoc), specifically so that results from different checks -- and different checkers -- are
+distinguishable by `ruleId`, which is what makes a per-rule baseline comparison possible across
+more than one checker in the first place.
 
 ## Running it via Gradle
 

@@ -81,18 +81,20 @@ tasks.register('smokeTest', JavaExec) {
 
 check.dependsOn smokeTest
 
-// Demonstrates -- and regression-tests -- using SarifDiagnostics together with the EISOP Checker
-// Framework's Nullness Checker as an annotation processor, entirely from the checkerFrameworkDemo
-// configuration above; the packaged application itself has no Checker Framework dependency. See
-// demo/checker-framework/README.md for the full explanation and how to run this by hand.
+// Demonstrates -- and regression-tests -- using SarifDiagnostics together with two EISOP Checker
+// Framework checkers (Nullness and Interning) run as annotation processors at once, entirely from
+// the checkerFrameworkDemo configuration above; the packaged application itself has no Checker
+// Framework dependency. See demo/checker-framework/README.md for the full explanation, including
+// why -Awarns is required to get findings from both checkers in one run, and how to run this by
+// hand.
 tasks.register('checkerFrameworkDemo', JavaExec) {
-    description = 'Runs the Nullness Checker on the demo files through SarifDiagnostics and checks the SARIF output.'
+    description = 'Runs the Nullness and Interning Checkers on the demo files through SarifDiagnostics and checks the SARIF output.'
     group = 'verification'
     classpath = sourceSets.main.runtimeClasspath
     mainClass = 'io.github.eisopux.diagnostics.builtin.SarifDiagnostics'
     workingDir = rootDir
-    // Demo.java and OtherError.java each have an intentional error, so SarifDiagnostics is
-    // expected to exit 1; that is not this task's failure.
+    // Demo.java, InterningError.java, and OtherError.java each have an intentional error, so
+    // SarifDiagnostics is expected to exit 1; that is not this task's failure.
     ignoreExitValue = true
     // The Checker Framework reaches into javac internals not exported by default on JDK 16+.
     jvmArgs = [
@@ -110,8 +112,12 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
         '-classpath',
         configurations.checkerFrameworkDemo.asPath,
         '-processor',
-        'org.checkerframework.checker.nullness.NullnessChecker',
+        'org.checkerframework.checker.nullness.NullnessChecker,org.checkerframework.checker.interning.InterningChecker',
+        // See demo/checker-framework/InterningError.java's Javadoc for why this is required to
+        // get findings from both checkers, rather than javac stopping after the first one's.
+        '-Awarns',
         'demo/checker-framework/Demo.java',
+        'demo/checker-framework/InterningError.java',
         'demo/checker-framework/OtherError.java'
     ]
 
@@ -122,10 +128,12 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
     }
     doLast {
         String sarif = outputFile.text
-        // One finding from the Checker Framework (its own message key as ruleId) and one plain
-        // javac diagnostic (its raw code as ruleId) -- see OtherError.java's Javadoc for why.
+        // One finding from each of two different checkers (each one's own message key as ruleId)
+        // and one plain javac diagnostic (its raw code as ruleId) -- see OtherError.java's
+        // Javadoc for why that one must be a separate finding from the other two.
         List<String> expectedRuleIds = [
             'dereference.of.nullable',
+            'not.interned',
             'compiler.err.prob.found.req'
         ]
         List<String> missing = expectedRuleIds.findAll {
