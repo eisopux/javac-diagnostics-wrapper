@@ -180,9 +180,9 @@ public class JsonDiagnostics {
         CompilerRunner runner =
                 new CompilerRunner()
                         .addCollector(new DiagnosticCollector())
-                        .setReporter(new JSONReporter());
+                        .setReporter(new JsonReporter());
 
-        runner.run(args);
+        System.exit(runner.run(args) ? 0 : 1);
     }
 }
 ```
