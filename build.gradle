@@ -21,7 +21,6 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     if (JavaVersion.current() >= JavaVersion.VERSION_21) {
         errorprone('com.google.errorprone:error_prone_core:2.48.0')
-        errorproneJavac('com.google.errorprone:javac:9+181-r4173-1')
     }
 }
 
