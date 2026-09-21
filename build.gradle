@@ -6,11 +6,19 @@ plugins {
     id 'java'
     id 'application'
     id 'eclipse'
+    id 'maven-publish'
+    id 'signing'
     // https://plugins.gradle.org/plugin/com.gradleup.shadow
     id 'com.gradleup.shadow' version '9.4.1'
     id 'com.diffplug.spotless' version '8.10.2'
     id 'net.ltgt.errorprone' version '5.1.0'
 }
+
+// The Maven Central namespace this project publishes under. Verified for the `eisopux` GitHub
+// org specifically -- distinct from (and not to be confused with) `io.github.eisop`, which is
+// checker-framework's own, separately-verified namespace.
+group = 'io.github.eisopux'
+version = '0.1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
@@ -48,6 +56,12 @@ dependencies {
 application {
     // Define the main class for the application
     mainClass = 'io.github.eisopux.diagnostics.builtin.JsonDiagnostics'
+}
+
+java {
+    // Maven Central requires both alongside the compiled jar.
+    withJavadocJar()
+    withSourcesJar()
 }
 
 tasks.withType(JavaCompile) { compilationTask ->
@@ -156,6 +170,98 @@ tasks.register('checkerFrameworkDemo', JavaExec) {
 }
 
 check.dependsOn checkerFrameworkDemo
+
+// Publishing configuration, modeled on eisop/checker-framework's gradle-mvn-push.gradle (see
+// https://github.com/eisop/checker-framework/blob/master/docs/developer/maven-central-publishing.md
+// for the full one-time maintainer setup this depends on: a Maven Central Portal account with
+// publish rights on the io.github.eisopux namespace, and a GPG key on a public keyserver). This
+// project has only one publishable module, so unlike checker-framework's multi-project setup,
+// everything lives inline here rather than in a separate shared script.
+final isSnapshot = version.toString().endsWith('SNAPSHOT')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'javac diagnostics wrapper'
+                description = 'A customizable wrapper around javac that aggregates and outputs ' +
+                        'compiler diagnostics in a desired format using a pluggable architecture.'
+                url = 'https://eisopux.github.io/'
+                licenses {
+                    license {
+                        name = 'GNU General Public License, version 2'
+                        url = 'https://www.gnu.org/licenses/old-licenses/gpl-2.0.html'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'wmdietl'
+                        name = 'Werner M. Dietl'
+                        email = 'wdietl@gmail.com'
+                        url = 'https://ece.uwaterloo.ca/~wdietl/'
+                        organization = 'University of Waterloo'
+                        organizationUrl = 'https://uwaterloo.ca/electrical-computer-engineering/'
+                    }
+                }
+                scm {
+                    url = 'https://github.com/eisopux/javac-diagnostics-wrapper.git'
+                    connection = 'scm:git:https://github.com/eisopux/javac-diagnostics-wrapper.git'
+                    developerConnection = 'scm:git:ssh://git@github.com/eisopux/javac-diagnostics-wrapper.git'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url = (isSnapshot
+            ? (findProperty('SNAPSHOT_REPOSITORY_URL') ?: 'https://central.sonatype.com/repository/maven-snapshots/')
+            : (findProperty('RELEASE_REPOSITORY_URL') ?: 'https://ossrh-staging-api.central.sonatype.com/service/local/staging/deploy/maven2/')
+            )
+            credentials {
+                username = findProperty('SONATYPE_NEXUS_USERNAME')
+                password = findProperty('SONATYPE_NEXUS_PASSWORD')
+            }
+        }
+    }
+}
+
+signing {
+    // Use external gpg cmd. This makes it easy to use gpg-agent, to avoid being prompted for a
+    // password once per artifact.
+    useGpgCmd()
+
+    // If anything about signing is misconfigured, fail loudly rather than quietly continuing with
+    // unsigned artifacts.
+    required = true
+
+    sign publishing.publications.mavenJava
+}
+
+// Only sign releases; snapshots are unsigned.
+tasks.withType(Sign).configureEach {
+    onlyIf {
+        !isSnapshot && project.hasProperty('release')
+    }
+    doFirst {
+        // Any maintainer may sign a release, each with their own key, so no key is hardcoded.
+        // Require the key to be named explicitly: otherwise gpg falls back to whichever secret
+        // key happens to be its default, which may not be one Maven Central can verify.
+        if (!project.hasProperty('signing.gnupg.keyName')) {
+            throw new GradleException(
+            'signing.gnupg.keyName is not set, so gpg would sign with its default key.\n' +
+            'Set it to your own key, either in ~/.gradle/gradle.properties or as\n' +
+            '-Psigning.gnupg.keyName=<key id or email>.')
+        }
+    }
+}
+
+// Regression-tests the publication itself (POM metadata, javadoc/sources jars, ...) on every
+// build, the same way smokeTest and checkerFrameworkDemo regression-test other parts of the
+// project. Needs no credentials or signing: it only writes to the local ~/.m2 repository, and
+// signing is skipped for a snapshot version without -Prelease (see above).
+check.dependsOn publishToMavenLocal
 
 spotless {
     java {
