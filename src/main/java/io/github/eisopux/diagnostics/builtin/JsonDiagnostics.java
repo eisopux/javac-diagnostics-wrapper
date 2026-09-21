@@ -12,6 +12,6 @@ public class JsonDiagnostics {
                         .addCollector(new DiagnosticCollector())
                         .setReporter(new JsonReporter());
 
-        runner.run(args);
+        System.exit(runner.run(args) ? 0 : 1);
     }
 }

@@ -12,6 +12,6 @@ public class LspDiagnostics {
                         .addCollector(new DiagnosticCollector())
                         .setReporter(new LspReporter());
 
-        runner.run(args);
+        System.exit(runner.run(args) ? 0 : 1);
     }
 }

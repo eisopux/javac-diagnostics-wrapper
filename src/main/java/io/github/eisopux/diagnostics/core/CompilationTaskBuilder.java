@@ -1,20 +1,33 @@
 package io.github.eisopux.diagnostics.core;
 
+import java.io.Closeable;
 import java.io.File;
-import java.util.*;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.lang.model.SourceVersion;
-import javax.tools.*;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.OptionChecker;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 /**
  * CompilationTaskBuilder is a utility class that encapsulates the creation of a {@link
  * javax.tools.JavaCompiler.CompilationTask} for a {@link Collector} to attach to.
+ *
+ * <p>Closing a builder closes the {@link StandardJavaFileManager} it created; do so (e.g. via
+ * try-with-resources) once the built {@link javax.tools.JavaCompiler.CompilationTask} has run.
  */
-public class CompilationTaskBuilder {
+public class CompilationTaskBuilder implements Closeable {
     private final JavaCompiler compiler;
     private final StandardJavaFileManager fileManager;
     private final JavacOptions options;
-    private javax.tools.DiagnosticCollector<JavaFileObject> diagnosticListener;
+    private DiagnosticCollector<JavaFileObject> diagnosticListener;
     private final Iterable<? extends JavaFileObject> javaFiles;
 
     private CompilationTaskBuilder(
@@ -41,7 +54,7 @@ public class CompilationTaskBuilder {
      * @throws IllegalStateException if no system Java compiler is found
      */
     public static CompilationTaskBuilder fromArgs(String[] args) {
-        JavaCompiler compiler = javax.tools.ToolProvider.getSystemJavaCompiler();
+        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         if (compiler == null) {
             throw new IllegalStateException(
                     "No system Java compiler found. Are you running a JRE instead of a JDK?");
@@ -86,6 +99,19 @@ public class CompilationTaskBuilder {
                 options.getRecognizedOptions(),
                 options.getClassNames(),
                 javaFiles);
+    }
+
+    /**
+     * Closes the {@link StandardJavaFileManager} this builder created, releasing any open file
+     * handles.
+     */
+    @Override
+    public void close() {
+        try {
+            fileManager.close();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /** JavacOptions encapsulates the parsing of command-line arguments for the Java compiler. */
